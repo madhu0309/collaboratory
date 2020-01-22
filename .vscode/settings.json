@@ -1,0 +1,19 @@
+{
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#4fe56c",
+    "activityBar.activeBorder": "#8b74ea",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#8b74ea",
+    "activityBarBadge.foreground": "#15202b",
+    "titleBar.activeBackground": "#23de47",
+    "titleBar.inactiveBackground": "#23de4799",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveForeground": "#15202b99",
+    "statusBar.background": "#23de47",
+    "statusBarItem.hoverBackground": "#1bb338",
+    "statusBar.foreground": "#15202b"
+  },
+  "peacock.color": "#23de47",
+  "python.pythonPath": "/home/madhu/.local/share/virtualenvs/collaboratory_project-21w1CP-r/bin/python"
+}

@@ -1,0 +1,18 @@
+version: '3.6'
+
+services: 
+  web: 
+    build: .
+    command: python /task/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/task
+    ports: 
+      - 8000:8000
+    depends_on: 
+      - db
+  db:
+    image: postgres:11
+    environment: 
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=collab_db

@@ -1,0 +1,12 @@
+{% extends 'collab_app/base.html' %}
+
+{% block body_block %}
+    <h1>Questions</h1>
+    {% for question in question_list %}
+        <a href="{% url 'collab_app:question-detail' question.id %}">{{ question.question_title }}</a>
+        <p></p>
+        {{ question.question_body }}
+        <br>
+        
+    {% endfor %}
+{% endblock %}

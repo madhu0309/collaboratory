@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+{% extends 'collab_app/base.html' %}
+
+{% block body_block %}
+    Question Title: {{ question.question_title }}<p></p>
+    Question Body: {{ question.question_body }}
+    {% for answer in question.question_answer.all %}
+        {{ answer }}<p></p>
+    {% endfor %}
+    <form  method="POST" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit">
+    </form>
+    
+    
+    
+{% endblock %}

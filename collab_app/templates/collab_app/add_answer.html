@@ -1,0 +1,9 @@
+
+
+<h1>Answer</h1>
+<form action="{% url 'collab_app:question-detail' question.id %}' question.id %}" method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit">
+</form>
+
