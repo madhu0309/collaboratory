@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% extends 'collab_app/base.html' %}
+{% load crispy_forms_tags %}
 
 {% block body_block %}
     Question Title: {{ question.question_title }}<p></p>
@@ -7,12 +8,11 @@
     {% for answer in question.question_answer.all %}
         {{ answer }}<p></p>
     {% endfor %}
-    <form  method="POST" novalidate>
+    <div class="container">
+      <form  method="POST" novalidate>
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form|crispy }}
         <input type="submit">
-    </form>
-    
-    
-    
+      </form>
+    </div>    
 {% endblock %}

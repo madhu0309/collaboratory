@@ -1,9 +1,13 @@
 {% extends 'collab_app/base.html' %}
+{% load crispy_forms_tags %}
+
 
 {% block body_block %}
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit">
+  <div class="container">
+    <form method="POST" novalidate>
+      {% csrf_token %}
+      {{ form|crispy }}
+      <input type="submit">
     </form>
+  </div>
 {% endblock %}

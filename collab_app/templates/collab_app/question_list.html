@@ -1,12 +1,35 @@
 {% extends 'collab_app/base.html' %}
 
 {% block body_block %}
+    <a href="{% url 'collab_app:add-question' %}"><button type="button" class="btn btn-secondary" style="float: right;">Ask Question</button>
+</a>
     <h1>Questions</h1>
-    {% for question in question_list %}
-        <a href="{% url 'collab_app:question-detail' question.id %}">{{ question.question_title }}</a>
+    {% for exam in list_exams %}
+        <a href="{% url 'collab_app:question-detail' exam.id %}">{{ exam.question_title }}</a>
         <p></p>
+        {% comment "" %}
         {{ question.question_body }}
+        {% endcomment %}
         <br>
         
     {% endfor %}
+    {% if is_paginated %}
+        <ul class="pagination">
+    {% if page_obj.has_previous %}
+        <li>
+            <span><a href="?page={{ page_obj.previous_page_number }}&search_key={{q}}">Previous</a></span>
+        </li>
+    {% endif %}
+        <li class="">
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</span>
+        </li>
+    {% if page_obj.has_next %}
+        <li>
+            <span><a href="?page={{ page_obj.next_page_number }}&search_key={{q}}">Next</a></span>
+        </li>
+    {% endif %}
+    </ul>
+    {% else %}
+        <p style="color:green";>No more questions</p>
+    {% endif %}
 {% endblock %}

@@ -1,13 +1,18 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from collab_app.models import (Question)
+from django.db.models import Q
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
+from django.urls import reverse
 from collab_app.forms import *
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
 from collab_app.forms import NewUserForm
+from django.core.paginator import Paginator
+from django.core.paginator import EmptyPage
+from django.core.paginator import PageNotAnInteger
 # Create your views here.
 import os
 
@@ -15,6 +20,41 @@ import os
 class QuestionListView(ListView):
     model = Question
     template_name = "collab_app/question_list.html"
+    paginate_by = 4
+    
+    def get_queryset(self): # new
+        if self.request.GET.get('q') != None:
+            query = self.request.GET.get('q')
+            return Question.objects.filter(
+                Q(question_title__icontains=query) #| Q(author__icontains=query)
+            )
+        else:
+            return Question.objects.all()
+    
+    def get_context_data(self, **kwargs):
+        #search_key = 
+        context = super(QuestionListView, self).get_context_data(**kwargs)
+        if self.request.GET.get('q') != None:
+            query = self.request.GET.get('q')
+            list_exam =  Question.objects.filter(
+                Q(question_title__icontains=query) #| Q(author__icontains=query)
+            ) 
+        else:
+            list_exam = Question.objects.all()
+        paginator = Paginator(list_exam, self.paginate_by)
+
+        page = self.request.GET.get('page')
+
+        try:
+            file_exams = paginator.page(page)
+        except PageNotAnInteger:
+            file_exams = paginator.page(1)
+        except EmptyPage:
+            file_exams = paginator.page(paginator.num_pages)
+
+        context['list_exams'] = file_exams
+        context['search'] = self.request.GET.get('q')
+        return context
 
     # def dispatch(self, request, *args, **kwargs):
     #     # Try to dispatch to the right method; if a method doesn't exist,
@@ -78,7 +118,7 @@ def add_question(request):
         form = QuestionForm(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponse("<h1> You are successfully added</h1>")
+            return redirect('collab_app:question-list')
     if request.method == 'GET':
         form = QuestionForm()
     return render(request, 'collab_app/add_question.html', {'form': form})
