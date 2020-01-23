@@ -17,7 +17,7 @@
         <ul class="pagination">
     {% if page_obj.has_previous %}
         <li>
-            <span><a href="?page={{ page_obj.previous_page_number }}&search_key={{q}}">Previous</a></span>
+            <span><a href="?page={{ page_obj.previous_page_number }}&q={{search}}">Previous</a></span>
         </li>
     {% endif %}
         <li class="">
@@ -25,7 +25,7 @@
         </li>
     {% if page_obj.has_next %}
         <li>
-            <span><a href="?page={{ page_obj.next_page_number }}&search_key={{q}}">Next</a></span>
+            <span><a href="?page={{ page_obj.next_page_number }}&q={{search}}">Next</a></span>
         </li>
     {% endif %}
     </ul>

@@ -1,11 +1,13 @@
 {% extends 'collab_app/base.html' %}
+{% load crispy_forms_tags %}
+
 
 {% block body_block %}
 
     <div class="container">
         <form method="POST">
             {% csrf_token %}
-            {{form.as_p}}
+            {{form|crispy}}
             <button style="background-color:chocolate; color:paleturquoise" class = "btn btn-outline-info" type="submit">Login</button>
         </form>
         Don't have an account? <a href="/register" target='blank'><strong>register here</strong></a>

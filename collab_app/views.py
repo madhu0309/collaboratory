@@ -6,10 +6,10 @@ from django.views.generic.detail import DetailView
 from django.urls import reverse
 from collab_app.forms import *
 from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import logout, authenticate, login
+#from django.contrib.auth.forms import AuthenticationForm
+#from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
-from collab_app.forms import NewUserForm
+#from collab_app.forms import NewUserForm
 from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
@@ -22,14 +22,14 @@ class QuestionListView(ListView):
     template_name = "collab_app/question_list.html"
     paginate_by = 4
     
-    def get_queryset(self): # new
-        if self.request.GET.get('q') != None:
-            query = self.request.GET.get('q')
-            return Question.objects.filter(
-                Q(question_title__icontains=query) #| Q(author__icontains=query)
-            )
-        else:
-            return Question.objects.all()
+    # def get_queryset(self): # new
+    #     if self.request.GET.get('q') != None:
+    #         query = self.request.GET.get('q')
+    #         return Question.objects.filter(
+    #             Q(question_title__icontains=query) #| Q(author__icontains=query)
+    #         )
+    #     else:
+    #         return Question.objects.all()
     
     def get_context_data(self, **kwargs):
         #search_key = 
@@ -124,60 +124,60 @@ def add_question(request):
     return render(request, 'collab_app/add_question.html', {'form': form})
 
 
-def register(request):
-    if request.method == "POST":
-        form = NewUserForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f"New account created: {username}")
-            login(request, user)
-            return redirect('collab_app:question-list')
+# def register(request):
+#     if request.method == "POST":
+#         form = NewUserForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             username = form.cleaned_data.get('username')
+#             messages.success(request, f"New account created: {username}")
+#             login(request, user)
+#             return redirect('collab_app:question-list')
 
-        else:
-            for msg in form.error_messages:
-                messages.error(request, f"{msg}: {form.error_messages[msg]}")
-                # print(form.error_messages[msg])
-            return render(request=request,
-                          template_name='collab_app/register.html',
-                          context={"form": form})
+#         else:
+#             for msg in form.error_messages:
+#                 messages.error(request, f"{msg}: {form.error_messages[msg]}")
+#                 # print(form.error_messages[msg])
+#             return render(request=request,
+#                           template_name='collab_app/register.html',
+#                           context={"form": form})
 
-    form = NewUserForm
-    return render(request=request,
-                  template_name="collab_app/register.html",
-                  context={"form": form})
+#     form = NewUserForm
+#     return render(request=request,
+#                   template_name="collab_app/register.html",
+#                   context={"form": form})
 
 
-def logout_request(request):
-    logout(request)
-    messages.info(request, "Logged out successfully")
-    return redirect("collab_app:question-list")
+# def logout_request(request):
+#     logout(request)
+#     messages.info(request, "Logged out successfully")
+#     return redirect("collab_app:question-list")
+
+# # def login_request(request):
+# #     form = AuthenticationForm()
+# #     return render(request = request,
+# #                 template_name="collab_app/login.html",
+# #                 context = {"form":form})
+
 
 # def login_request(request):
+#     if request.method == 'POST':
+#         form = AuthenticationForm(request=request, data=request.POST)
+#         if form.is_valid():
+#             username = form.cleaned_data.get('username')
+#             password = form.cleaned_data.get('password')
+#             user = authenticate(username=username, password=password)
+#             # return redirect('collab_app:question-list')
+#             if user is not None:
+#                 login(request, user)
+#                 messages.info(request, f"You are now logged in as {username}")
+#                 return redirect('/')
+#             else:
+#                 messages.error(request, "Invalid username or password.")
 #     form = AuthenticationForm()
-#     return render(request = request,
-#                 template_name="collab_app/login.html",
-#                 context = {"form":form})
-
-
-def login_request(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request=request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            # return redirect('collab_app:question-list')
-            if user is not None:
-                login(request, user)
-                messages.info(request, f"You are now logged in as {username}")
-                return redirect('/')
-            else:
-                messages.error(request, "Invalid username or password.")
-    form = AuthenticationForm()
-    return render(request=request,
-                  template_name='collab_app/login.html',
-                  context={"form": form})
+#     return render(request=request,
+#                   template_name='collab_app/login.html',
+#                   context={"form": form})
 
 
 def get_env(request):

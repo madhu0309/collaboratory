@@ -1,19 +1,19 @@
 {
   "workbench.colorCustomizations": {
-    "activityBar.background": "#4fe56c",
-    "activityBar.activeBorder": "#8b74ea",
+    "activityBar.background": "#9d9d2a",
+    "activityBar.activeBorder": "#9ae4e4",
     "activityBar.foreground": "#15202b",
     "activityBar.inactiveForeground": "#15202b99",
-    "activityBarBadge.background": "#8b74ea",
+    "activityBarBadge.background": "#9ae4e4",
     "activityBarBadge.foreground": "#15202b",
-    "titleBar.activeBackground": "#23de47",
-    "titleBar.inactiveBackground": "#23de4799",
-    "titleBar.activeForeground": "#15202b",
-    "titleBar.inactiveForeground": "#15202b99",
-    "statusBar.background": "#23de47",
-    "statusBarItem.hoverBackground": "#1bb338",
-    "statusBar.foreground": "#15202b"
+    "titleBar.activeBackground": "#75751f",
+    "titleBar.inactiveBackground": "#75751f99",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveForeground": "#e7e7e799",
+    "statusBar.background": "#75751f",
+    "statusBarItem.hoverBackground": "#9d9d2a",
+    "statusBar.foreground": "#e7e7e7"
   },
-  "peacock.color": "#23de47",
+  "peacock.color": "#75751f",
   "python.pythonPath": "/home/madhu/.local/share/virtualenvs/collaboratory_project-21w1CP-r/bin/python"
 }

@@ -3,16 +3,16 @@
 {% load crispy_forms_tags %}
 
 {% block body_block %}
+  <div class="container">
     Question Title: {{ question.question_title }}<p></p>
     Question Body: {{ question.question_body }}
     {% for answer in question.question_answer.all %}
         {{ answer }}<p></p>
     {% endfor %}
-    <div class="container">
       <form  method="POST" novalidate>
         {% csrf_token %}
         {{ form|crispy }}
         <input type="submit">
       </form>
-    </div>    
+  </div>    
 {% endblock %}

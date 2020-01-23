@@ -12,6 +12,8 @@ psycopg2 = "==2.8.4"
 pytz = "==2019.3"
 sqlparse = "==0.3.0"
 Django = "==3.0.2"
+black = "==19.10b0"
+pylint = "*"
 
 [requires]
 python_version = "3.6"
