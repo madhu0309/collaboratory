@@ -22,9 +22,9 @@ urlpatterns = [
     # Django admin
     path("admin/", admin.site.urls),
     # User management
-    path("accounts/", include("django.contrib.auth.urls")),
+    # path("accounts/", include("django.contrib.auth.urls")),
     # Local apps
-    path("accounts/", include("users.urls")),
-    # path('',include('collab_app.urls', "collab_app"))
-    path("", HomePageView.as_view(), name="home"),
+    path("accounts/", include("allauth.urls")),
+    path("", include("users.urls")),
+    path("collab/", include("collab_app.urls"),),  # , "collab_app")),
 ]

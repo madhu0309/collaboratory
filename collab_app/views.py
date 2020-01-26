@@ -1,27 +1,31 @@
 from django.shortcuts import get_object_or_404, redirect, render
-from collab_app.models import (Question)
+from collab_app.models import Question
 from django.db.models import Q
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.urls import reverse
 from collab_app.forms import *
 from django.http import HttpResponse, HttpResponseRedirect
-#from django.contrib.auth.forms import AuthenticationForm
-#from django.contrib.auth import logout, authenticate, login
+
+# from django.contrib.auth.forms import AuthenticationForm
+# from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
-#from collab_app.forms import NewUserForm
+
+# from collab_app.forms import NewUserForm
 from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
+
 # Create your views here.
 import os
 
 
 class QuestionListView(ListView):
     model = Question
+    context_object_name = "question_list"
     template_name = "collab_app/question_list.html"
-    paginate_by = 4
-    
+    paginate_by = 2
+
     # def get_queryset(self): # new
     #     if self.request.GET.get('q') != None:
     #         query = self.request.GET.get('q')
@@ -30,20 +34,20 @@ class QuestionListView(ListView):
     #         )
     #     else:
     #         return Question.objects.all()
-    
+
     def get_context_data(self, **kwargs):
-        #search_key = 
+        # search_key =
         context = super(QuestionListView, self).get_context_data(**kwargs)
-        if self.request.GET.get('q') != None:
-            query = self.request.GET.get('q')
-            list_exam =  Question.objects.filter(
-                Q(question_title__icontains=query) #| Q(author__icontains=query)
-            ) 
+        if self.request.GET.get("q") != None:
+            query = self.request.GET.get("q")
+            list_exam = Question.objects.filter(
+                Q(question_title__icontains=query)  # | Q(author__icontains=query)
+            )
         else:
             list_exam = Question.objects.all()
         paginator = Paginator(list_exam, self.paginate_by)
 
-        page = self.request.GET.get('page')
+        page = self.request.GET.get("page")
 
         try:
             file_exams = paginator.page(page)
@@ -52,8 +56,9 @@ class QuestionListView(ListView):
         except EmptyPage:
             file_exams = paginator.page(paginator.num_pages)
 
-        context['list_exams'] = file_exams
-        context['search'] = self.request.GET.get('q')
+        context["list_exams"] = file_exams
+        if self.request.GET.get("q") != None:
+            context["search"] = self.request.GET.get("q")
         return context
 
     # def dispatch(self, request, *args, **kwargs):
@@ -76,52 +81,72 @@ class QuestionListView(ListView):
 def question_detail_view(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     data = {"question": question}
-    if request.method == 'POST':
+    if request.method == "POST":
         form = AnswerForm(request.POST)
         if form.is_valid():
             ans = form.save(commit=False)
             ans.question = question
             ans.save()
-            return HttpResponse("<h1> You are successfully added answer</h1>")
+            return redirect("collab:question_list")
         else:
-            data['form'] = form
+            data["form"] = form
 
     else:
         form = AnswerForm()
-        data['form'] = form
-    return render(request, 'collab_app/question_detail.html', data)
+        data["form"] = form
+    return render(request, "collab_app/question_detail.html", data)
 
 
-def add_answers(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    if request.method == 'POST':
-        form = AnswerForm(request.POST)
-        if form.is_valid():
-            ans = form.save(commit=False)
-            ans.question = question
-            ans.save()
-            redirect('/')
+# def add_answers(request, question_id):
+#     question = get_object_or_404(Question, pk=question_id)
+#     if request.method == "POST":
+#         form = AnswerForm(request.POST)
+#         if form.is_valid():
+#             ans = form.save(commit=False)
+#             ans.question = question
+#             ans.save()
+#             redirect("/")
 
-        else:
-            for msg in form.error_messages:
-                print(msg)
-                #messages.error(request, f"{msg}: {form.error_messages[msg]}")
+#         else:
+#             for msg in form.error_messages:
+#                 print(msg)
+#                 # messages.error(request, f"{msg}: {form.error_messages[msg]}")
 
-    if request.method == 'GET':
-        form = AnswerForm()
-    context = {'question': question, 'form': form}
-    return render(request, 'collab_app/add_answer.html', context)
+#     if request.method == "GET":
+#         form = AnswerForm()
+#     context = {"question": question, "form": form}
+#     return render(request, "collab_app/add_answer.html", context)
+
+
+# class AnswerForm(View):
+#     question = get_object_or_404(Question, pk=question_id)
+
+#     def get(self, request):
+#         form = AnswerForm()
+
+#     def post(self, request):
+#         form = AnswerForm(request.POST)
+#         if form.is_valid():
+#             ans = form.save(commit=False)
+#             ans.question = question
+#             ans.save()
+#             redirect("/")
+#         else:
+#             for msg in form.error_messages:
+#                 print(msg)
+#         context = {"question": question, "form": form}
+#         return render(request, "collab_app/add_answer.html", context)
 
 
 def add_question(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = QuestionForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('collab_app:question-list')
-    if request.method == 'GET':
+            return redirect("collab_app:question-list")
+    if request.method == "GET":
         form = QuestionForm()
-    return render(request, 'collab_app/add_question.html', {'form': form})
+    return render(request, "collab_app/add_question.html", {"form": form})
 
 
 # def register(request):
@@ -181,4 +206,5 @@ def add_question(request):
 
 
 def get_env(request):
-    return  HttpResponse(str(os.environ.items()))
+    return HttpResponse(str(os.environ.items()))
+

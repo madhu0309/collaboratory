@@ -4,12 +4,14 @@ from django import forms
 
 class AnswerForm(forms.ModelForm):
     """AnswerForm definition."""
+
     class Meta:
         model = models.Answer
-        fields = ('answer_text',)
+        fields = ("answer_text",)
+        # label=mark_safe('my label<br />next line'
 
     def clean_answer_text(self):
-        answer_text = self.cleaned_data.get('answer_text')
+        answer_text = self.cleaned_data.get("answer_text")
         if not answer_text or len(answer_text) < 3:
             raise forms.ValidationError("Please enter the answer!")
         return answer_text
@@ -22,8 +24,5 @@ class QuestionForm(forms.ModelForm):
         """Meta definition for Questionform."""
 
         model = models.Question
-        fields = ('question_title', 'question_body')
-
-
-
+        fields = ("question_title", "question_body")
 

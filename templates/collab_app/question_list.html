@@ -1,0 +1,47 @@
+{% extends "_base.html" %}
+{% load static %}
+{% load socialaccount %}
+{% block title %}Collab{% endblock title %}
+{% block content %}
+<a href="{% url 'collab_app:add-question' %}"><button type="button" class="btn btn-secondary" style="float: right;">Ask
+        Question</button>
+</a>
+<h1>Questions</h1>
+{% for exam in list_exams %}
+<div class="card">
+    <div class="card-header">
+        <a href="{% url 'collab_app:question-detail' exam.id %}">{{ exam.question_title }}</a>
+    </div>
+    <div class="card-body">
+        <blockquote class="blockquote mb-0">
+            {% comment %} {% for i in exam.question_body %}
+            {% if forloop.counter==10 %}
+            {{i}}
+            {% endif %}
+            {% endfor %} {% endcomment %}
+            <p>{{ exam.get_question_body }}...</p>
+        </blockquote>
+    </div>
+</div>
+
+{% endfor %}
+{% if is_paginated %}
+<ul class="pagination">
+    {% if page_obj.has_previous %}
+    <li>
+        <span><a href="?page={{ page_obj.previous_page_number }}&q={{search}}">Previous</a></span>
+    </li>
+    {% endif %}
+    <li class="">
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</span>
+    </li>
+    {% if page_obj.has_next %}
+    <li>
+        <span><a href="?page={{ page_obj.next_page_number }}&q={{search}}">Next</a></span>
+    </li>
+    {% endif %}
+</ul>
+{% else %}
+<p style="color:green" ;>No more questions</p>
+{% endif %}
+{% endblock content %}

@@ -1,0 +1,35 @@
+{% extends "_base.html" %}
+{% load static %}
+{% load socialaccount %}
+{% load crispy_forms_tags %}
+{% block title %}Collab{% endblock title %}
+{% block content %}
+<div class="container">
+  <div class="card">
+    <div class="card-header">
+      {{ question.question_title }}
+    </div>
+    <div class="card-body">
+      <blockquote class="blockquote mb-0">
+        <p>{{ question.question_body }}</p>
+      </blockquote>
+    </div>
+  </div>
+  <p></p>
+  {% for answer in question.question_answer.all %}
+  <p>ipsum dolor sit amet consectetur adipisicing elit. Possimus id rerum, ipsa harum facere quidem odio reiciendis
+    porro eaque enim a aperiam sed facilis illum atque perspiciatis voluptas delectus sunt!
+    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Illum modi explicabo aspernatur ipsum ea, animi,
+    recusandae
+    at laboriosam asperiores eveniet, impedit sit illo itaque officiis minima mollitia voluptatem accusamus magnam!
+    Lorem ipsum dolor sit amet consectetur adipisicing elit. Cupiditate voluptate fugit, saepe veniam autem possimus
+    excepturi, illo exercitationem officiis iste nisi perferendis debitis numquam id itaque libero quo, alias dicta.</p>
+  {{ answer|linebreaks }}<p></p>
+  {% endfor %}
+  <form method="POST">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <input type="submit">
+  </form>
+</div>
+{% endblock content %}

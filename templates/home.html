@@ -1,15 +1,19 @@
 {% extends "_base.html" %} 
 {% load static %}
+{% load socialaccount %}
 {% block title %}Home{% endblock title %} 
 {% block content %}
 <h1>Homepage</h1>
-<img class="collabimage" src="{% static 'images/collab.jpg' %}" >
+<a href="{% url 'collab_app:question-list' %}">Ask Question Here</a>
+<img class="collabimage" src="{% static 'images/collab.jpg' %}" ><br>
 {% if user.is_authenticated %}
   Hi {{ user.email }}
-  <p><a href="{% url 'logout' %}">Log Out</a></p>
+  <p><a href="{% url 'account_logout' %}">Log Out</a></p>
 {% else %}
   <p>You are not logged in</p>
-  <a href="{% url 'login' %}">Login</a>
-  <a href="{% url 'signup' %}">Sign Up</a>
+  <!--Github-->
+  <a href="{% provider_login_url 'github' %}" ><p class="git">Github</p></a>
+  <a href="{% url 'account_login' %}">Login</a>
+  <a href="{% url 'account_signup' %}">Sign Up</a>
 {% endif %}
 {% endblock content %}

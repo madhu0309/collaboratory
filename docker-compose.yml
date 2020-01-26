@@ -4,6 +4,9 @@ services:
   web: 
     build: .
     command: python /task/manage.py runserver 0.0.0.0:8000
+    environment: 
+      - SECRET_KEY=wgd40#_k7dij%4yx=a8b-c!1e-w9sh2h&&%=w-z496sxap%c)j
+      - DEBUG=1
     volumes:
       - .:/task
     ports: 
