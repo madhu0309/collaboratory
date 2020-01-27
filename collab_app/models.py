@@ -17,7 +17,10 @@ class Question(models.Model):
         return self.question_title[:10]
 
     def get_absolute_url(self):
-        return reverse("question_detail", kwargs={"slug": self.slug})
+        return reverse("question-detail", kwargs={"slug": self.slug})
+
+    # def get_absolute_url(self):
+    #     return reverse("question-detail", args=[str(self.id)])
 
     def get_question_body(self):
         return self.question_body[:50]

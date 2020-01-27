@@ -17,16 +17,9 @@
   </div>
   <p></p>
   {% for answer in question.question_answer.all %}
-  <p>ipsum dolor sit amet consectetur adipisicing elit. Possimus id rerum, ipsa harum facere quidem odio reiciendis
-    porro eaque enim a aperiam sed facilis illum atque perspiciatis voluptas delectus sunt!
-    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Illum modi explicabo aspernatur ipsum ea, animi,
-    recusandae
-    at laboriosam asperiores eveniet, impedit sit illo itaque officiis minima mollitia voluptatem accusamus magnam!
-    Lorem ipsum dolor sit amet consectetur adipisicing elit. Cupiditate voluptate fugit, saepe veniam autem possimus
-    excepturi, illo exercitationem officiis iste nisi perferendis debitis numquam id itaque libero quo, alias dicta.</p>
-  {{ answer|linebreaks }}<p></p>
+  {{ answer.answer_text|linebreaks }}<p></p>
   {% endfor %}
-  <form method="POST">
+  <form method="post" action"{% url "collab_app:question-detail" question.id %}">
     {% csrf_token %}
     {{ form|crispy }}
     <input type="submit">

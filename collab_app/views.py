@@ -3,19 +3,24 @@ from collab_app.models import Question
 from django.db.models import Q
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.urls import reverse
-from collab_app.forms import *
+from django.urls import reverse, reverse_lazy
+from collab_app.forms import QuestionForm, AnswerForm
 from django.http import HttpResponse, HttpResponseRedirect
-
-# from django.contrib.auth.forms import AuthenticationForm
-# from django.contrib.auth import logout, authenticate, login
+from django.views.generic.edit import FormView, CreateView
+from django.views.generic import UpdateView, DeleteView
 from django.contrib import messages
-
-# from collab_app.forms import NewUserForm
 from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
 
+# from django.utils import json
+
+# from dal import autocomplete
+
+# from haystack.generic_views import SearchView
+# from django.contrib.auth.forms import AuthenticationForm
+# from django.contrib.auth import logout, authenticate, login
+# from collab_app.forms import NewUserForm
 # Create your views here.
 import os
 
@@ -38,6 +43,7 @@ class QuestionListView(ListView):
     def get_context_data(self, **kwargs):
         # search_key =
         context = super(QuestionListView, self).get_context_data(**kwargs)
+
         if self.request.GET.get("q") != None:
             query = self.request.GET.get("q")
             list_exam = Question.objects.filter(
@@ -61,40 +67,116 @@ class QuestionListView(ListView):
             context["search"] = self.request.GET.get("q")
         return context
 
-    # def dispatch(self, request, *args, **kwargs):
-    #     # Try to dispatch to the right method; if a method doesn't exist,
-    #     # defer to the error handler. Also defer to the error handler if the
-    #     # request method isn't on the approved list.
-    #     print('---' * 20)
-    #     if request.method.lower() in self.http_method_names:
-    #         handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
-    #     else:
-    #         handler = self.http_method_not_allowed
-    #     return handler(request, *args, **kwargs)
 
-
-# class QuestionDetailView(DetailView):
-#     model = Question
-#     template_name = "collab_app/question_detail.html"
-
-
-def question_detail_view(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    data = {"question": question}
-    if request.method == "POST":
-        form = AnswerForm(request.POST)
-        if form.is_valid():
-            ans = form.save(commit=False)
-            ans.question = question
-            ans.save()
-            return redirect("collab:question_list")
-        else:
-            data["form"] = form
-
+def autocompleteModel(request):
+    if request.is_ajax():
+        q = request.GET.get("term", "").capitalize()
+        search_qs = Question.objects.filter(question_title__startswith=q)
+        results = []
+        # print q
+        for r in search_qs:
+            results.append(r.FIELD)
+        data = json.dumps(results)
     else:
-        form = AnswerForm()
-        data["form"] = form
-    return render(request, "collab_app/question_detail.html", data)
+        data = "fail"
+    mimetype = "application/json"
+    return HttpResponse(data, mimetype)
+
+
+class QuestionDetailView(FormView, DetailView):
+    model = Question
+    form_class = AnswerForm
+    template_name = "collab_app/question_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionDetailView, self).get_context_data(**kwargs)
+        print(self)
+        print(context)
+        if "slug" in self.kwargs:
+            context["object"] = get_object_or_404(Question, slug=self.kwargs["slug"])
+        context["form"] = self.get_form()
+        return context
+
+    def form_valid(self, form):
+        print("+++++++++++++++++")
+        print(self.slug_url_kwarg)
+        print(self.get_slug_field)
+        print(self.slug_url_kwarg)
+        print(self.get_object().slug)
+        print("++++++++++++++++++")
+        instance = form.save(commit=False)
+        instance.question = Question.objects.get(slug=self.get_object().slug)
+        instance.save()
+        return HttpResponseRedirect(
+            reverse("collab_app:question-detail", args=[self.get_object().slug])
+        )
+
+
+class QuestionCreate(CreateView):
+    model = Question
+    fields = ["question_title", "question_body"]
+    template_name = "collab_app/add_question.html"
+
+    def form_valid(self, form):
+        instance = form.save(commit=False)
+        instance.save()
+        return HttpResponseRedirect(reverse("collab_app:question-list"))
+
+
+class QuestionUpdateView(UpdateView):
+    model = Question
+    form_class = QuestionForm
+    template_name = "collab_app/add_question.html"
+
+    def get_success_url(self):
+        return reverse("collab_app:question-list")
+
+
+class QuestionDeleteView(DeleteView):
+    model = Question
+
+    def get_success_url(self):
+        return reverse("collab_app:question-list")
+
+
+#   def add_question(request):
+#     if request.method == "POST":
+#         form = QuestionForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect("collab_app:question-list")
+#     if request.method == "GET":
+#         form = QuestionForm()
+#     return render(request, "collab_app/add_question.html", {"form": form})
+
+
+#     if kwargs != None:
+#         return reverse_lazy('collab_app:question-detail', kwargs = {'pk': kwargs['']})
+
+
+# class AnswerFormView(FormView):
+#     form_class = AnswerForm
+#     print(self)
+#     success_url = reverse("collab_app:question-list")
+
+
+# def question_detail_view(request, question_id):
+#     question = get_object_or_404(Question, pk=question_id)
+#     data = {"question": question}
+#     if request.method == "POST":
+#         form = AnswerForm(request.POST)
+#         if form.is_valid():
+#             ans = form.save(commit=False)
+#             ans.question = question
+#             ans.save()
+#             return redirect("collab:question_list")
+#         else:
+#             data["form"] = form
+
+#     else:
+#         form = AnswerForm()
+#         data["form"] = form
+#     return render(request, "collab_app/question_detail.html", data)
 
 
 # def add_answers(request, question_id):
@@ -136,18 +218,6 @@ def question_detail_view(request, question_id):
 #                 print(msg)
 #         context = {"question": question, "form": form}
 #         return render(request, "collab_app/add_answer.html", context)
-
-
-def add_question(request):
-    if request.method == "POST":
-        form = QuestionForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("collab_app:question-list")
-    if request.method == "GET":
-        form = QuestionForm()
-    return render(request, "collab_app/add_question.html", {"form": form})
-
 
 # def register(request):
 #     if request.method == "POST":
@@ -205,6 +275,5 @@ def add_question(request):
 #                   context={"form": form})
 
 
-def get_env(request):
-    return HttpResponse(str(os.environ.items()))
-
+# def get_env(request):
+# return HttpResponse(str(os.environ.items()))
