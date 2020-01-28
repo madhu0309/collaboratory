@@ -25,4 +25,12 @@ class QuestionForm(forms.ModelForm):
 
         model = models.Question
         fields = ("question_title", "question_body")
-
+        # widgets = {
+        #     "question_title": forms.TextInput(
+        #         attrs={
+        #             "style": "width: 400px",
+        #             "class": "basicAutoComplete",
+        #             "data-url": "/collab/",
+        #         }
+        #     ),
+        # }

@@ -7,48 +7,81 @@
         Question</button>
 </a>
 <h1>Questions</h1>
-{% for exam in list_exams %}
+{% for question in question_lists %}
 <div class="card">
     <div class="card-header">
-        <a href="{% url 'collab_app:question-detail' exam.slug %}">{{ exam.question_title }}</a>
+        <a href="{% url 'collab_app:question-detail' question.slug %}">{{ question.question_title }}</a>
         <div class="float-right">
             <a href="#" class="btn btn-info edit" title="View"><i class="fas fa-eye"></i></a>
-            <a href="{% url 'collab_app:question-update' exam.slug %}" class="btn btn-success edit" title="Edit"><i
+            <a href="{% url 'collab_app:question-update' question.slug %}" class="btn btn-success edit" title="Edit"><i
                     class="fas fa-edit"></i></a>
-            <a href="{% url 'collab_app:question-update' exam.slug %}" class="btn btn-danger delete remove_account"
+            <a href="{% url 'collab_app:question-delete' question.slug %}" class="btn btn-danger delete remove_account"
                 title="Delete"><i class="fas fa-trash"></i></a>
         </div>
         <div class="card-body">
             <blockquote class="blockquote mb-0">
-                {% comment %} {% for i in exam.question_body %}
-                {% if forloop.counter==10 %}
-                {{i}}
-                {% endif %}
-                {% endfor %} {% endcomment %}
-                <p>{{ exam.get_question_body }}...</p>
+                <p>{{ question.get_question_body }}...</p>
             </blockquote>
         </div>
     </div>
 </div>
 
 {% endfor %}
-{% if is_paginated %}
-<ul class="pagination">
-    {% if page_obj.has_previous %}
-    <li>
-        <span><a href="?page={{ page_obj.previous_page_number }}&q={{search}}">Previous</a></span>
-    </li>
+<p></p>
+{% comment %} <div class="page">
+    {% if is_paginated %}
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li>
+            <span><a href="?page={{ page_obj.previous_page_number }}&q={{search}}">Previous</a></span>
+        </li>
+        {% endif %}
+        <li class="">
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</span>
+        </li>
+        {% if page_obj.has_next %}
+        <li>
+            <span><a href="?page={{ page_obj.next_page_number }}&q={{search}}">Next</a></span>
+        </li>
+        {% endif %}
+    </ul>
+    {% else %}
+    <p style="color:green" ;>No more questions</p>
     {% endif %}
-    <li class="">
-        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</span>
-    </li>
-    {% if page_obj.has_next %}
-    <li>
-        <span><a href="?page={{ page_obj.next_page_number }}&q={{search}}">Next</a></span>
-    </li>
-    {% endif %}
-</ul>
-{% else %}
-<p style="color:green" ;>No more questions</p>
-{% endif %}
+</div> {% endcomment %}
+<div class="d-flex flex-column m-auto pagination mt-5">
+    <nav aria-label="Page navigation">
+        <ul class="pagination pg-grey justify-content-center">
+            {% if question_lists.has_previous %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="?{% if query %}q={{query}}&{% endif %}page={{ question_lists.previous_page_number }}">&laquo;
+                    Previous</a>
+            </li>
+            {% endif %}
+
+            {% for i in question_lists.paginator.page_range %}
+            {% if question_lists.number == i %}
+            <li class="page-item active"><a class="page-link">{{ i }}</a></li>
+            {% else %}
+
+            <li class="page-item"><a class="page-link"
+                    href="?{% if query %}q={{query}}&{% endif %}page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+            {% endfor %}
+
+            {% if question_lists.has_next %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="?{% if query %}q={{query}}&{% endif %}page={{ question_lists.next_page_number }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link"
+                    href="?{% if query %}q={{query}}&{% endif %}page={{ question_lists.paginator.num_pages }}">Last
+                    &raquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
 {% endblock content %}

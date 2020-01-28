@@ -5,24 +5,16 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.urls import reverse, reverse_lazy
 from collab_app.forms import QuestionForm, AnswerForm
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView, CreateView
 from django.views.generic import UpdateView, DeleteView
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
-
-# from django.utils import json
-
-# from dal import autocomplete
-
-# from haystack.generic_views import SearchView
-# from django.contrib.auth.forms import AuthenticationForm
-# from django.contrib.auth import logout, authenticate, login
-# from collab_app.forms import NewUserForm
-# Create your views here.
 import os
+
+# CLASS BASED VIEWS
 
 
 class QuestionListView(ListView):
@@ -46,41 +38,26 @@ class QuestionListView(ListView):
 
         if self.request.GET.get("q") != None:
             query = self.request.GET.get("q")
-            list_exam = Question.objects.filter(
+            question_list = Question.objects.filter(
                 Q(question_title__icontains=query)  # | Q(author__icontains=query)
             )
         else:
-            list_exam = Question.objects.all()
-        paginator = Paginator(list_exam, self.paginate_by)
+            question_list = Question.objects.all()
+        paginator = Paginator(question_list, self.paginate_by)
 
         page = self.request.GET.get("page")
 
         try:
-            file_exams = paginator.page(page)
+            no_of_pages = paginator.page(page)
         except PageNotAnInteger:
-            file_exams = paginator.page(1)
+            no_of_pages = paginator.page(1)
         except EmptyPage:
-            file_exams = paginator.page(paginator.num_pages)
+            no_of_pages = paginator.page(paginator.num_pages)
 
-        context["list_exams"] = file_exams
+        context["question_lists"] = no_of_pages
         if self.request.GET.get("q") != None:
             context["search"] = self.request.GET.get("q")
         return context
-
-
-def autocompleteModel(request):
-    if request.is_ajax():
-        q = request.GET.get("term", "").capitalize()
-        search_qs = Question.objects.filter(question_title__startswith=q)
-        results = []
-        # print q
-        for r in search_qs:
-            results.append(r.FIELD)
-        data = json.dumps(results)
-    else:
-        data = "fail"
-    mimetype = "application/json"
-    return HttpResponse(data, mimetype)
 
 
 class QuestionDetailView(FormView, DetailView):
@@ -139,65 +116,94 @@ class QuestionDeleteView(DeleteView):
         return reverse("collab_app:question-list")
 
 
-#   def add_question(request):
-#     if request.method == "POST":
-#         form = QuestionForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect("collab_app:question-list")
-#     if request.method == "GET":
-#         form = QuestionForm()
-#     return render(request, "collab_app/add_question.html", {"form": form})
+# FUNCTION BASED VIEWS
 
 
-#     if kwargs != None:
-#         return reverse_lazy('collab_app:question-detail', kwargs = {'pk': kwargs['']})
+def add_question(request):
+    if request.method == "POST":
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("collab_app:question-list")
+    if request.method == "GET":
+        form = QuestionForm()
+    return render(request, "collab_app/add_question.html", {"form": form})
 
 
-# class AnswerFormView(FormView):
-#     form_class = AnswerForm
-#     print(self)
-#     success_url = reverse("collab_app:question-list")
+def is_valid_queryparam(param):
+    return param != "" and param is not None
 
 
-# def question_detail_view(request, question_id):
-#     question = get_object_or_404(Question, pk=question_id)
-#     data = {"question": question}
-#     if request.method == "POST":
-#         form = AnswerForm(request.POST)
-#         if form.is_valid():
-#             ans = form.save(commit=False)
-#             ans.question = question
-#             ans.save()
-#             return redirect("collab:question_list")
-#         else:
-#             data["form"] = form
+def question_list_view(request):
+    QUESTIONS_PER_PAGE = 2
+    context = {}
+    question_list = Question.objects.all()
+    if request.is_ajax():
+        queryset = Question.objects.filter(
+            question_title__icontains=request.GET.get("search", None)
+        )
+        list = []
+        for i in queryset:
+            list.append(i.question_title)
+        data = {
+            "list": list,
+        }
+        print(data)
+        return JsonResponse(data)
+    print(request.GET)
+    question_title_contains_query = request.GET.get("q", "")
+    context["query"] = str(question_title_contains_query)
+    # id_exact_query = request.GET.get()
+    # question_title_or_body_query = request.GET.get()
+    print(question_title_contains_query)
+    if is_valid_queryparam(question_title_contains_query):
+        question_list = question_list.filter(
+            question_title__icontains=question_title_contains_query
+        )
+    # Search with sorted
+    # quesion_list = sorted(question_title_contains_query())
+    # Search Using Id
+    # elif id_exact_query != "" and id_exact_query is not None:
+    #     question_list = question_list.filter(id=id_exact_query)
+    # Search by using two objects
+    # elif question_title_or_body_query != '' and question_title_or_body is not None:
+    #     question_list = question_list.filter(Q(question_title__icontains=question_title_or_body) |
+    #                                          Q(question_title__icontains=question_title_or_body)).distinct()
+    # Pagination
+    page = request.GET.get("page", 1)
+    paginator = Paginator(question_list, QUESTIONS_PER_PAGE)
 
-#     else:
-#         form = AnswerForm()
-#         data["form"] = form
-#     return render(request, "collab_app/question_detail.html", data)
+    try:
+        question_list = paginator.page(page)
+    except PageNotAnInteger:
+        question_list = paginator.page(QUESTIONS_PER_PAGE)
+    except EmptyPage:
+        question_list = paginator.page(paginator.num_pages)
+
+    context["question_lists"] = question_list
+    return render(request, "collab_app/question_list.html", context)
 
 
-# def add_answers(request, question_id):
-#     question = get_object_or_404(Question, pk=question_id)
-#     if request.method == "POST":
-#         form = AnswerForm(request.POST)
-#         if form.is_valid():
-#             ans = form.save(commit=False)
-#             ans.question = question
-#             ans.save()
-#             redirect("/")
+def question_detail_view(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    data = {"question": question}
+    if request.method == "POST":
+        form = AnswerForm(request.POST)
+        if form.is_valid():
+            ans = form.save(commit=False)
+            ans.question = question
+            ans.save()
+            return redirect("collab:question_list")
+        else:
+            data["form"] = form
+            for msg in form.error_messages:
+                print(msg)
+                # messages.error(request, f"{msg}: {form.error_messages[msg]}")
 
-#         else:
-#             for msg in form.error_messages:
-#                 print(msg)
-#                 # messages.error(request, f"{msg}: {form.error_messages[msg]}")
-
-#     if request.method == "GET":
-#         form = AnswerForm()
-#     context = {"question": question, "form": form}
-#     return render(request, "collab_app/add_answer.html", context)
+    else:
+        form = AnswerForm()
+        data["form"] = form
+    return render(request, "collab_app/question_detail.html", data)
 
 
 # class AnswerForm(View):
@@ -275,5 +281,5 @@ class QuestionDeleteView(DeleteView):
 #                   context={"form": form})
 
 
-# def get_env(request):
-# return HttpResponse(str(os.environ.items()))
+def get_env(request):
+    return HttpResponse(str(os.environ.items()))
