@@ -9,6 +9,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView, CreateView
 from django.views.generic import UpdateView, DeleteView
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
@@ -89,18 +90,19 @@ class QuestionDetailView(FormView, DetailView):
         )
 
 
-class QuestionCreate(CreateView):
+class QuestionCreate(LoginRequiredMixin, CreateView):
     model = Question
     fields = ["question_title", "question_body"]
     template_name = "collab_app/add_question.html"
 
     def form_valid(self, form):
         instance = form.save(commit=False)
+        instance.created_by = self.request.user
         instance.save()
         return HttpResponseRedirect(reverse("collab_app:question-list"))
 
 
-class QuestionUpdateView(UpdateView):
+class QuestionUpdateView(LoginRequiredMixin, UpdateView):
     model = Question
     form_class = QuestionForm
     template_name = "collab_app/add_question.html"

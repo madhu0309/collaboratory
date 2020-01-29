@@ -31,3 +31,11 @@ class QuestionTests(TestCase):
         self.assertContains(response, "How to create models in django")
         self.assertTemplateUsed(response, "collab_app/question_list.html")
 
+    def test_question_detail_view(self):
+        response = self.client.get(self.question.get_absolute_url())
+        no_response = self.client.get('/detail/How to create models in django/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(no_response.status_code= 404)
+        self.assertContains(response,'How to create models in django')
+        self.assertContains(response,'I am a newbie to django and I want to learn django quickly.What are the best possible ways to learn django')
+        self.assertTemplateUsed(response, 'collab_app/question_detail.html')

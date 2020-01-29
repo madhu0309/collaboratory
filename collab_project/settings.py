@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     # external packages
     "crispy_forms",
+    "django_extensions",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",

@@ -21,6 +21,7 @@ to = "*"
 bypass = "*"
 django-haystack = "==2.8.1"
 django-autocomplete-light = "*"
+django-extensions = "*"
 
 [requires]
 python_version = "3.6"

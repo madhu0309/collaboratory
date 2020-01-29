@@ -18,6 +18,7 @@
             <a href="{% url 'collab_app:question-delete' question.slug %}" class="btn btn-danger delete remove_account"
                 title="Delete"><i class="fas fa-trash"></i></a>
         </div>
+        <p>{{ question.created_by }}</p>
         <div class="card-body">
             <blockquote class="blockquote mb-0">
                 <p>{{ question.get_question_body }}...</p>

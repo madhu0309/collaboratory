@@ -2,8 +2,32 @@ from django.db import models
 from django.urls import reverse
 from collab_app.utils import unique_slug_generator
 from django.db.models.signals import pre_save
+from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericRelation
 
 # Create your models here.
+
+
+# class TaggedItem(models.Model):
+#     tag = models.SlugField()
+#     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+#     object_id = models.PositiveIntegerField()
+#     content_object = GenericForeignKey("content_type", "object_id")
+
+#     def __str__(self):
+#         return self.tag
+
+
+class Comment(models.Model):
+    comment = models.TextField(max_length=300, null=False, blank=False)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    def __str__(self):
+        return self.comment[:20]
 
 
 class Question(models.Model):
@@ -12,6 +36,10 @@ class Question(models.Model):
     question_body = models.TextField()
     pub_date = models.DateTimeField(auto_now_add=True)
     votes = models.IntegerField(default=0, blank=True)
+    created_by = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, null=True
+    )
+    comments = GenericRelation(Comment, related_query_name="question")
 
     def __str__(self):
         return self.question_title[:10]
@@ -44,6 +72,12 @@ class Answer(models.Model):
     )
     answer_text = models.TextField()
     votes = models.IntegerField(default=0, blank=True)
+    comments = GenericRelation(Comment, related_query_name="answer")
 
     def __str__(self):
         return self.answer_text[:30]
+
+    # commented_by = models.ForeignKey(
+    #     get_user_model(), on_delete=models.CASCADE, null=True
+    # )
+
