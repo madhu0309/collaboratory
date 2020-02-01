@@ -4,6 +4,7 @@
 {% load crispy_forms_tags %}
 {% block title %}Collab{% endblock title %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/comments.css' %}">
 <div class="container">
   <div class="card">
     <div class="card-header">
@@ -19,10 +20,43 @@
   {% for answer in question.question_answer.all %}
   {{ answer.answer_text|linebreaks }}<p></p>
   {% endfor %}
-  <form method="post" action"{% url "collab_app:question-detail" question.id %}">
+  <form method="post" action="{% url "collab_app:question-detail" question.id%}" novalidate>
     {% csrf_token %}
-    {{ form|crispy }}
-    <input type="submit">
+    <p><label for="id_answer_text">Answer text:</label> <textarea name="answer_text" cols="120" rows="5" required
+        id="id_answer_text">
+    </textarea></p>
+    <input type="submit" name="answer_form">
+  </form>
+  <a href="#">Type Comment Here</a>
+  <form method="post" action="{% url "collab_app:question-detail" question.id%}" novalidate>
+    {% csrf_token %}
+    <p><label for="id_message">Message:</label> <textarea name="message" cols="120" rows="3" maxlength="1500" required
+        id="id_message">
+    </textarea></p>
+    <input type="submit" name="comment_form">
   </form>
 </div>
+<!-- Comment Section -->
+<h1>Comment Widget</h1>
+<div style="width: 100%">
+  <div style="display:flex;margin-bottom:10px;">
+    <div>
+      <input type="text" placeholder="Name" id="name" class="name-handle" />
+    </div>
+    <div>
+      <input type="text" placeholder="handle" id="handle" class="name-handle" />
+    </div>
+  </div>
+  <div>
+    <textarea rows="5" id="comment" class="comment-box" placeholder="Join the discussion...."></textarea>
+    <div>
+      <button id="add-comment" class="add-btn">Add</button>
+    </div>
+
+  </div>
+  <h3>Comments</h3>
+  <ul id="commentsList">
+  </ul>
+</div>
+<script src="{% static 'js/comment.js' %}"></script>
 {% endblock content %}

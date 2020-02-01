@@ -34,3 +34,11 @@ class QuestionForm(forms.ModelForm):
         #         }
         #     ),
         # }
+
+
+class CommentForm(forms.ModelForm):
+    # comment_id = forms.IntegerField()
+
+    class Meta:
+        model = models.Comment
+        fields = ("message",)

@@ -1,10 +1,10 @@
 from django.shortcuts import get_object_or_404, redirect, render
-from collab_app.models import Question
+from collab_app.models import Question, Comment
 from django.db.models import Q
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.urls import reverse, reverse_lazy
-from collab_app.forms import QuestionForm, AnswerForm
+from collab_app.forms import QuestionForm, AnswerForm, CommentForm
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView, CreateView
 from django.views.generic import UpdateView, DeleteView
@@ -13,6 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
+from users.models import CustomUser
 import os
 
 # CLASS BASED VIEWS
@@ -113,9 +114,7 @@ class QuestionUpdateView(LoginRequiredMixin, UpdateView):
 
 class QuestionDeleteView(DeleteView):
     model = Question
-
-    def get_success_url(self):
-        return reverse("collab_app:question-list")
+    success_url = reverse_lazy("collab_app:question-list")
 
 
 # FUNCTION BASED VIEWS
@@ -188,24 +187,87 @@ def question_list_view(request):
 
 def question_detail_view(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
+    # data["comments"] = comments
     data = {"question": question}
+    comments = Comment.objects.filter(question=question)
+    data["comments"] = comments
+    comment_message = request.POST.get("message", "")
+    print(comment_message)
+    user = request.user
     if request.method == "POST":
-        form = AnswerForm(request.POST)
-        if form.is_valid():
-            ans = form.save(commit=False)
-            ans.question = question
-            ans.save()
-            return redirect("collab:question_list")
-        else:
-            data["form"] = form
-            for msg in form.error_messages:
-                print(msg)
-                # messages.error(request, f"{msg}: {form.error_messages[msg]}")
+        if "answer_form" in request.POST:
+            form = AnswerForm(request.POST)
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.question = question
+                instance.save()
+                return redirect("collab_app:question-list")
+            else:
+                data["form"] = form
+                for msg in form.error_messages:
+                    print(msg)
+                    messages.error(request, f"{msg}: {form.error_messages[msg]}")
 
-    else:
-        form = AnswerForm()
-        data["form"] = form
+        # else:
+        #     form = AnswerForm()
+        #     data["form"] = form
+        # CommentForm
+        elif "comment_form" in request.POST:
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.content_object = question
+                instance.user = user
+                instance.save()
+                return HttpResponseRedirect(
+                    reverse("collab_app:question-detail", args=[question.id])
+                )
+            else:
+                data["form"] = form
+                # for msg in form.error_messages:
+                #     print(msg)
+                #     messages.error(request, f"{msg}: {form.error_messages[msg]}")
+
+        # else:
+        #     form = CommentForm
+        #     data["form"] = form
+
+    # Comment.objects.create(user=user, message=comment_message, content_object=question)
+
     return render(request, "collab_app/question_detail.html", data)
+
+
+def delete_question(request, slug):
+    context = {}
+    question = Question.objects.all()
+    context = question.objects.filter(slug=slug).delete()
+    return render(request, context)
+
+
+def add_comment_view(request):
+    # comment = get_object_or_404(Question, pk=question_id)  # filter(question=question)
+    comment = Comment.objects.all()
+    data = {"comments": comment}
+
+    if request.method == "POST":
+        print(request.POST)
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)
+            comment_obj = form.save(commit=False)
+            comment_id = request.POST.get("comment_id", "")
+            if comment_id != None:
+                comment_obj.parent_id = comment_id
+                comment_obj.save()
+            else:
+                comment_obj.save()
+
+        else:
+            print(form.errors)
+    else:
+        form = CommentForm()
+        data["form"] = form
+    return render(request, "collab_app/thread.html", data)  # data)
 
 
 # class AnswerForm(View):
