@@ -11,9 +11,7 @@ urlpatterns = [
     # path("", views.QuestionListView.as_view(), name="question-list"),
     url(r"^collab/$", views.question_list_view, name="question-list"),
     # path("", views.question_list_view, name="question-list"),
-    path(
-        "detail/<int:question_id>", views.question_detail_view, name="question-detail"
-    ),
+    path("detail/<int:pk>/", views.question_detail_view, name="question-detail"),
     # path(
     #     "detail/<slug:slug>/",
     #     views.QuestionDetailView.as_view(),

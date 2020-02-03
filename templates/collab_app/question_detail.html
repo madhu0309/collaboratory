@@ -8,19 +8,19 @@
 <div class="container">
   <div class="card">
     <div class="card-header">
-      {{ question.question_title }}
+      {{ instance.question_title }}
     </div>
     <div class="card-body">
       <blockquote class="blockquote mb-0">
-        <p>{{ question.question_body }}</p>
+        <p>{{ instance.question_body }}</p>
       </blockquote>
     </div>
   </div>
   <p></p>
-  {% for answer in question.question_answer.all %}
+  {% for answer in instance.question_answer.all %}
   {{ answer.answer_text|linebreaks }}<p></p>
   {% endfor %}
-  <form method="post" action="{% url "collab_app:question-detail" question.id%}" novalidate>
+  <form method="post" action="{% url "collab_app:question-detail" instance.id%}" novalidate>
     {% csrf_token %}
     <p><label for="id_answer_text">Answer text:</label> <textarea name="answer_text" cols="120" rows="5" required
         id="id_answer_text">
@@ -28,35 +28,121 @@
     <input type="submit" name="answer_form">
   </form>
   <a href="#">Type Comment Here</a>
-  <form method="post" action="{% url "collab_app:question-detail" question.id%}" novalidate>
+  {% comment %} <form method="post" action="{% url "collab_app:question-detail" question.id%}" novalidate>
     {% csrf_token %}
     <p><label for="id_message">Message:</label> <textarea name="message" cols="120" rows="3" maxlength="1500" required
         id="id_message">
     </textarea></p>
     <input type="submit" name="comment_form">
-  </form>
+  </form> {% endcomment %}
 </div>
-<!-- Comment Section -->
-<h1>Comment Widget</h1>
-<div style="width: 100%">
-  <div style="display:flex;margin-bottom:10px;">
-    <div>
-      <input type="text" placeholder="Name" id="name" class="name-handle" />
-    </div>
-    <div>
-      <input type="text" placeholder="handle" id="handle" class="name-handle" />
-    </div>
-  </div>
-  <div>
-    <textarea rows="5" id="comment" class="comment-box" placeholder="Join the discussion...."></textarea>
-    <div>
-      <button id="add-comment" class="add-btn">Add</button>
-    </div>
 
+
+
+<div class='row'>
+  <div class='col-sm-12 '>
+    <p class='lead'>Comments</p>
+    {% if request.user.is_authenticated %}
+    <form method="POST" action="."> {% csrf_token %}
+      {{ comment_form|crispy }}
+      <input type='submit' value='Post comment' class='btn btn-default'>
+    </form>
+    {% else %}
+    <p>You must login to comment </p>
+    {% endif %}
+    <hr />
+    {% for comment in comments %}
+
+    <blockquote class="blockquote">
+      <p>{{ comment.message }}</p>
+      <footer class="blockquote-footer">via {{ comment.user }} | {{ comment.timestamp|timesince }} ago |
+        {% if comment.children.count > 0 %}{{ comment.children.count }}
+        Comment{% if comment.children.count > 1 %}s{% endif %} | {% endif %} <a href='#'>Reply</a>
+        | <a class='' href='{{ comment.get_absolute_url }}'>Thread</a></footer>
+
+      <!-- style="display: none;" -->
+      {% for child_comment in comment.children.all %}
+      <blockquote style="margin: 50px;" onclick="addSpace({{forloop.counter}})" class="blockquote">
+        <p>{{ child_comment.message }}</p>
+        <footer class="blockquote-footer">via {{ child_comment.user }} | {{ child_comment.timestamp|timesince }} ago
+        </footer>
+      </blockquote>
+      {% endfor %}
+      <button onclick="togInHtml({{forloop.counter}}, {{ comment.id}})">Tog</button>
+      
+      {% comment %} <button id="button" onclick="formfade({{forloop.counter}})">press</button> {% endcomment %}
+      <div id="form{{forloop.counter}}">
+        <!-- style="display: none;" -->
+        {% if request.user.is_authenticated %}
+          <div id="togid{{forloop.counter}}">
+          </div>
+        {% comment %} <form method="POST" action="."> {% csrf_token %}
+          {{ comment_form|crispy }}
+          <input type='hidden' name="parent_id" value='{{ comment.id }}'>
+          <input type='submit' name="comment_form" value='Reply' class='btn btn-default'>
+        </form>  {% endcomment %}
+      </div>
+      {% else %}
+      <p>You must login to comment </p>
+      {% endif %}
+
+
+    </blockquote>
+
+    <hr />
+    {% endfor %}
+
+
+    <!-- Comment Section -->
+    {% comment %} <h1>Comment Widget</h1>
+    <div style="width: 100%">
+      <div style="display:flex;margin-bottom:10px;">
+        <div>
+          <input type="text" placeholder="Name" id="name" class="name-handle" />
+        </div>
+        <div>
+          <input type="text" placeholder="handle" id="handle" class="name-handle" />
+        </div>
+      </div>
+      <div>
+        <textarea rows="5" id="comment" class="comment-box" placeholder="Join the discussion...."></textarea>
+        <div>
+          <button id="add-comment" class="add-btn">Add</button>
+        </div>
+
+      </div>
+      <h3>Comments</h3>
+      <ul id="commentsList">
+      </ul>
+    </div> {% endcomment %}
   </div>
-  <h3>Comments</h3>
-  <ul id="commentsList">
-  </ul>
 </div>
-<script src="{% static 'js/comment.js' %}"></script>
+{% block javascript %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script>
+  function addSpace(num) {
+
+  }
+
+  function InHtml() {
+    document.getElementById("demo").innerHTML = "Paragraph changed!";
+  }
+
+  function togInHtml(num, comment_id) {
+    var x = document.getElementById("togid" + num);
+    if (x.innerHTML === "") {
+      x.innerHTML = ` <form method="POST" action="."> {% csrf_token %}{{ comment_form|crispy }}<input type='hidden' name="parent_id" value="${comment_id}"><input type='submit' name="comment_form" value='Reply' class='btn btn-default'></form>`;
+    } else {
+      x.innerHTML = "";
+    }
+  }
+
+  //when reply button is clicked hide it
+  //function formfade(num) {
+  //  $('#form' + num).toggle()
+  //}
+</script>
+<!-- <script src="{% static 'js/comment.js' %}"></script> -->
+{% endblock javascript %}
 {% endblock content %}

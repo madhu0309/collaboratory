@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.conf import settings
 from collab_app.utils import unique_slug_generator
 from django.db.models.signals import pre_save
 from users.models import CustomUser
@@ -12,14 +13,22 @@ from django.utils.translation import gettext as _
 # Create your models here.
 
 
-# class TaggedItem(models.Model):
-#     tag = models.SlugField()
-#     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-#     object_id = models.PositiveIntegerField()
-#     content_object = GenericForeignKey("content_type", "object_id")
+class CommentManager(models.Manager):
+    def all(self):
+        qs = super(CommentManager, self).filter(parent=None)
+        return qs
 
-#     def __str__(self):
-#         return self.tag
+    def filter_by_instance(self, instance):
+        content_type = ContentType.objects.get_for_model(instance.__class__)
+        obj_id = instance.id
+        qs = (
+            super(CommentManager, self)
+            .filter(content_type=content_type, object_id=obj_id)
+            .filter(parent=None)
+        )
+        return qs
+
+
 class Comment(models.Model):
     user = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, verbose_name=_("User")
@@ -30,16 +39,33 @@ class Comment(models.Model):
         "self",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         verbose_name=_("Parent comment"),
-        related_name="children",
+        # related_name="children",
     )
     is_approved = models.BooleanField(default=True, verbose_name=_("Is approved"))
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
 
+    objects = CommentManager()
+
+    class Meta:
+        ordering = ["timestamp"]
+
     def __str__(self):
         return self.message[:20]
+
+    def children(self):
+        return Comment.objects.filter(parent=self)
+
+    # return self.objects.filter(parent=self)
+    @property
+    def is_parent(self):
+        """Return 'True' if instance is a parent."""
+        if self.parent is not None:
+            return False
+        return True
 
 
 class Question(models.Model):
@@ -56,14 +82,33 @@ class Question(models.Model):
     def __str__(self):
         return self.question_title[:10]
 
-    def get_absolute_url(self):
-        return reverse("collab_app:question-detail", kwargs={"slug": self.slug})
-
+    # def get_absolute_url(self):
+    #     return reverse("collab_app:question-detail", kwargs={"slug": self.slug})
+    # @property
     # def get_absolute_url(self):
     #     return reverse("question-detail", args=[str(self.id)])
 
     def get_question_body(self):
         return self.question_body[:50]
+
+    @property
+    def comments(self):
+        instance = self
+        qs = Comment.objects.filter_by_instance(instance)
+        return qs
+
+    @property
+    def get_content_type(self):
+        instance = self
+        content_type = ContentType.objects.get_for_model(instance.__class__)
+        return content_type
+
+
+# for comment in Comment.objects.all():
+# ...     if comment.is_parent:
+# ...         print(comment.message)
+# ...     else:
+# ...         print(comment.children.all().first())
 
 
 def pre_save_receiver(sender, instance, *args, **kwargs):

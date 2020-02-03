@@ -14,6 +14,7 @@ from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
 from users.models import CustomUser
+from django.contrib.contenttypes.models import ContentType
 import os
 
 # CLASS BASED VIEWS
@@ -185,56 +186,96 @@ def question_list_view(request):
     return render(request, "collab_app/question_list.html", context)
 
 
-def question_detail_view(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
+def question_detail_view(request, pk):
+    instance = get_object_or_404(Question, pk=pk)
     # data["comments"] = comments
-    data = {"question": question}
-    comments = Comment.objects.filter(question=question)
-    data["comments"] = comments
-    comment_message = request.POST.get("message", "")
-    print(comment_message)
+    # data = {"question": question}
+    # comments = Comment.objects.filter(question=question)
+    # data["comments"] = comments
+    # comment_message = request.POST.get("message", "")
+    # print(comment_message)
+
+    initial_data = {"content_type": instance.get_content_type, "object_id": instance.id}
+
     user = request.user
-    if request.method == "POST":
-        if "answer_form" in request.POST:
-            form = AnswerForm(request.POST)
-            if form.is_valid():
-                instance = form.save(commit=False)
-                instance.question = question
-                instance.save()
-                return redirect("collab_app:question-list")
-            else:
-                data["form"] = form
-                for msg in form.error_messages:
-                    print(msg)
-                    messages.error(request, f"{msg}: {form.error_messages[msg]}")
+    # import pdb;pdb.set_trace()
+    # if request.method == "POST":
+    #     if "answer_form" in request.POST:
+    #         form = AnswerForm(request.POST)
+    #         if form.is_valid():
+    #             instance = form.save(commit=False)
+    #             instance.question = question
+    #             instance.save()
+    #             return redirect("collab_app:question-list")
+    #         else:
+    #             data["form"] = form
+    #             for msg in form.error_messages:
+    #                 print(msg)
+    #                 messages.error(request, f"{msg}: {form.error_messages[msg]}")
 
-        # else:
-        #     form = AnswerForm()
-        #     data["form"] = form
-        # CommentForm
-        elif "comment_form" in request.POST:
-            form = CommentForm(request.POST)
-            if form.is_valid():
-                instance = form.save(commit=False)
-                instance.content_object = question
-                instance.user = user
-                instance.save()
-                return HttpResponseRedirect(
-                    reverse("collab_app:question-detail", args=[question.id])
-                )
-            else:
-                data["form"] = form
-                # for msg in form.error_messages:
-                #     print(msg)
-                #     messages.error(request, f"{msg}: {form.error_messages[msg]}")
+    # else:
+    #     form = AnswerForm()
+    #     data["form"] = form
+    # CommentForm
+    # elif "comment_form" in request.POST:
+    form = CommentForm(request.POST or None, initial=initial_data)
+    if form.is_valid():
+        # form = form.save(commit=False)
+        print(form.cleaned_data)
+        # import pdb;pdb.set_trace()
+        c_type = form.cleaned_data.get("content_type")
+        content_type = ContentType.objects.get(
+            app_label=c_type.split()[0], model=c_type.split()[2]
+        )
+        obj_id = form.cleaned_data.get("object_id")
+        message = form.cleaned_data.get("message")
+        parent_obj = None
+        try:
+            parent_id = int(request.POST.get("parent_id"))
+        except:
+            parent_id = None
 
-        # else:
-        #     form = CommentForm
-        #     data["form"] = form
+        if parent_id:
+            parent_qs = Comment.objects.filter(id=parent_id)
+            if parent_qs.exists() and parent_qs.count() == 1:
+                parent_obj = parent_qs.first()
 
-    # Comment.objects.create(user=user, message=comment_message, content_object=question)
+        new_comment, created = Comment.objects.get_or_create(
+            user=request.user,
+            content_type=content_type,
+            object_id=obj_id,
+            message=message,
+            parent=parent_obj,
+        )
+        if created:
+            print("Yeah created")
+        return HttpResponseRedirect(
+            reverse("collab_app:question-detail", args=[instance.id])
+        )
+    comments = instance.comments
+    context = {
+        "instance": instance,
+        "comments": comments,
+        "comment_form": form,
+    }
+    return render(request, "collab_app/question_detail.html", context)
 
-    return render(request, "collab_app/question_detail.html", data)
+    #             return HttpResponseRedirect(
+    #                 reverse("collab_app:question-detail", args=[question.id])
+    #             )
+    #         else:
+    #             data["form"] = form
+    #             # for msg in form.error_messages:
+    #             #     print(msg)
+    #             #     messages.error(request, f"{msg}: {form.error_messages[msg]}")
+
+    #     # else:
+    #     #     form = CommentForm
+    #     #     data["form"] = form
+
+    # # Comment.objects.create(user=user, message=comment_message, content_object=question)
+
+    # return render(request, "collab_app/question_detail.html", data)
 
 
 def delete_question(request, slug):

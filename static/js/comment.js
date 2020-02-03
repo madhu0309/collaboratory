@@ -205,4 +205,3 @@ let timeAgo = (date) => {
         return `${minuteDiff} minute${minuteDiff == 1 ? "" : "s"} ago`;
     return `a few seconds ago`;
 }
-
