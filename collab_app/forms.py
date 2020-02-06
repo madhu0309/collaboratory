@@ -36,7 +36,7 @@ class QuestionForm(forms.ModelForm):
         # }
 
 
-class CommentForm(forms.Form):
+class CommentForm(forms.ModelForm):
     content_type = forms.CharField(widget=forms.HiddenInput)
     object_id = forms.IntegerField(widget=forms.HiddenInput)
     message = forms.CharField(label="", widget=forms.Textarea)
@@ -46,3 +46,33 @@ class CommentForm(forms.Form):
     class Meta:
         model = models.Comment
         fields = ("message",)
+
+    def clean_message(self):
+        message_text = self.cleaned_data.get("message", None)
+        message_text = message_text.strip() if message_text else ""
+        if not message_text or len(message_text) < 5:
+            raise forms.ValidationError("Please enter the message!")
+        return message_text
+
+
+# class ReviewDataForm(ModelForm):
+#     class Meta:
+#         model = ReviewData
+#         fields = '__all__'
+
+
+#     def __init__(self, *args, **kwargs):
+#         super(ReviewDataForm, self).__init__(*args, **kwargs)
+#         for field in self.fields:
+#             if field in ['first_name', 'last_name']:
+#                 self.fields[field].label = "Enter Your " + (' ').join(field.split('_'))
+#                 self.fields[field].widget.attrs = {
+#                     'class' : 'form-control',
+#                     'placeholder': 'Enter your ' + (' ').join(field.split('_'))
+#                 }
+#             else:
+#                 self.fields[field].label = "Enter Your " + field
+#                 self.fields[field].widget.attrs = {
+#                     'class' : 'form-control',
+#                     'placeholder': 'Enter your ' + field
+#                 }

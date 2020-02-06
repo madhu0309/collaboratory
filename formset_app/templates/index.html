@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <h3>Information</h3>
+    {{ Formset.management_form }}
+    <div id="form_set">
+        {% for form in Formset.forms %}
+        <table class='no_error'>
+            {{ form.as_table }}
+        </table>
+        {% endfor %}
+    </div>
+    <input type="button" value="Add More" id="add_more">
+    <input type="button" value="Delete" id="delete_form">
+    <div id="empty_form" style="display:none">
+        <table class='no_error'>
+            {{ Formset.empty_form.as_table }}
+        </table>
+    </div>
+</body>
+
+</html>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8=" crossorigin="anonymous"></script>
+<script>
+    $('#add_more').click(function () {
+        var form_idx = $('#id_form-TOTAL_FORMS').val();
+        $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+        $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+    });
+</script>

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     # Local apps
     "collab_app.apps.CollabAppConfig",
     "users.apps.UsersConfig",
+    "formset_app.apps.FormsetAppConfig",
     # external packages
     "crispy_forms",
     "django_extensions",

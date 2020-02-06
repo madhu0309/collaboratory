@@ -27,4 +27,5 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("", include("users.urls")),
     path("collab/", include("collab_app.urls"),),  # , "collab_app")),
+    path("formset/", include("formset_app.urls"),),
 ]
