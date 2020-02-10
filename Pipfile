@@ -22,6 +22,10 @@ bypass = "*"
 django-haystack = "==2.8.1"
 django-autocomplete-light = "*"
 django-extensions = "*"
+django-dynamic-formsets = "*"
+django-bootstrap-dynamic-formsets = "==0.4.3"
+django-bootstrap3 = "*"
+django-staticfiles = "*"
 
 [requires]
 python_version = "3.6"

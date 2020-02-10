@@ -51,6 +51,10 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.github",
+    "django_bootstrap_dynamic_formsets",
+    "bootstrap3",
+    # "staticfiles",
+    # "dynamic_formsets",
     # "haystack",
 ]
 
@@ -92,13 +96,17 @@ WSGI_APPLICATION = "collab_project.wsgi.application"
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
+    # "default": {
+    #     "ENGINE": "django.db.backends.postgresql",
+    #     "NAME": "collaboratory",
+    #     "USER": "postgres",
+    #     "PASSWORD": "root",
+    #     "HOST": "db",
+    #     "PORT": 5432,
+    # }
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "collaboratory",
-        "USER": "postgres",
-        "PASSWORD": "root",
-        "HOST": "db",
-        "PORT": 5432,
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
     }
 }
 
@@ -141,10 +149,10 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-STATICFILES_FINDERS = [
-    "django.contrib.staticfiles.finders.FileSystemFinder",
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-]
+# STATICFILES_FINDERS = [
+#     "django.contrib.staticfiles.finders.FileSystemFinder",
+#     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+# ]
 
 AUTH_USER_MODEL = "users.CustomUser"
 

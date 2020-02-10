@@ -1,0 +1,82 @@
+{% comment %} {% extends "testapp/page.html" %} {% endcomment %}
+{% load bootstrap3 %}
+{% load bootstrap_dynamic_formsets %}
+
+{% block content %}
+
+<form class="form-horizontal" method="post" action="">
+    {% csrf_token %}
+    {% bootstrap_dynamic_formset formset can_order=True can_delete=True layout="horizontal"%}
+    <button type="submit" id="form-submit" class="btn btn-success">Submit</button>
+
+</form>
+
+{% endblock %}
+
+
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+        integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+</head>
+
+<body>
+    <h1>Information</h1> {% endcomment %}
+
+    {% comment %}
+    (Your templated DOM here, possibly something like this:)
+    {% endcomment %}
+    {% comment %} <h3>FormSet example</h3>
+    {{ formset.management_form }}
+    <div id="form_set">
+        {% for form in formset.forms %}
+        {{form.non_field_errors}}
+        {{form.errors}}
+        <div id="abc">
+            <table class='no_error'>
+                {{ form }}
+            </table>
+        </div>
+        {% endfor %}
+        <button>Delete</button>
+    </div>
+    <input type="button" value="Add More" id="add_more">
+    <div id="empty_form" style="display:none">
+        <table class='no_error'>
+            {{ formset.empty_form }}
+        </table>
+    </div>
+</body>
+
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> {% endcomment %}
+{% comment %} <script>
+    $('#add_more').click(function () {
+        var form_idx = $('#id_form-TOTAL_FORMS').val();
+        $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+        $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+    });
+    $('#delete_it').click(function () {
+        var form_idx = $('#id_form-TOTAL_FORMS').val();
+        $('#form_set').remove($('#empty_form').html().replace(/__prefix__/g, form_idx));
+        $('#id_form-TOTAL_FORMS').val(parseInt(form_idx) - 1);
+    });
+
+    $(document).ready(function () {
+        $("button").click(function () {
+            $("#div1").remove();
+        });
+    });
+
+</script> {% endcomment %}
