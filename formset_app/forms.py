@@ -1,6 +1,6 @@
 from django import forms
-from django.forms import formset_factory, modelformset_factory
-from .models import Book
+from django.forms import formset_factory, modelformset_factory, inlineformset_factory
+from .models import Book, Author
 
 
 class BookForm(forms.Form):
@@ -41,13 +41,28 @@ BookModelFormset = modelformset_factory(
 )
 
 
-# AuthorFormset = modelformset_factory(
-#     Author,
-#     fields=("name",),
-#     extra=1,
-#     widgets={
-#         "name": forms.TextInput(
-#             attrs={"class": "form-control", "placeholder": "Enter Author Name here"}
-#         )
-#     },
-# )
+AuthorFormset = modelformset_factory(
+    Author,
+    fields=("name",),
+    extra=1,
+    widgets={
+        "name": forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Enter Author Name here"}
+        )
+    },
+)
+
+
+AuthorInlineFormset = inlineformset_factory(
+    Book,
+    Author,
+    fields=("name",),
+    # can_delete=True,
+    extra=1,
+    # max_num=6,
+    widgets={
+        "name": forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Enter Author Name here"}
+        )
+    },
+)

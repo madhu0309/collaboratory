@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.forms import modelformset_factory, inlineformset_factory
 from .models import Programmer, Language
 
@@ -48,7 +48,7 @@ def progview(request, programmer_id):
     #     queryset=Language.objects.filter(programmer_id=programmer.id)
     # )
     formset = LanguageFormset(instance=programmer)
-    return render(request, "prog.html", {"formset": formset})
+    return render(request, "formset_app/prog.html", {"formset": formset})
 
 
 # def manage_albums(request):
@@ -71,9 +71,36 @@ def progview(request, programmer_id):
 #     return render(request, "formset_app/manage_album.html", {"formset": formset})
 
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .forms import BookFormset, BookModelFormset
-from .models import Book
+from django.http import HttpResponse, HttpResponseRedirect
+from .forms import (
+    BookFormset,
+    BookModelFormset,
+    BookForm,
+    BookModelForm,
+    AuthorFormset,
+    AuthorInlineFormset,
+)
+from .models import Book, Author
+
+
+def create_book_normal(request):
+    template_name = "formset_app/create_normal.html"
+    heading_message = "Formset Demo"
+    if request.method == "GET":
+        formset = BookFormset(request.GET or None)
+    elif request.method == "POST":
+        formset = BookFormset(request.POST)
+        if formset.is_valid():
+            print(formset)
+            for form in formset:
+                name = form.cleaned_data.get("name")
+                if name:
+                    Book(name=name).save()
+            return HttpResponse("<h1>It worked not as expected</h1>")
+
+    return render(
+        request, template_name, {"formset": formset, "heading": heading_message,}
+    )
 
 
 def create_book_model_form(request):
@@ -85,11 +112,54 @@ def create_book_model_form(request):
         formset = BookModelFormset(request.POST)
         if formset.is_valid():
             for form in formset:
-                # only save if name is present
                 if form.cleaned_data.get("name"):
                     form.save()
             return HttpResponse("<h1>It worked not as expected</h1>")
 
     return render(
         request, template_name, {"formset": formset, "heading": heading_message,}
+    )
+
+
+def create_book_with_authors(request):
+    template_name = "formset_app/create_with_author.html"
+    if request.method == "GET":
+        bookform = BookModelForm(request.GET or None)
+        formset = AuthorFormset(queryset=Author.objects.none())
+    elif request.method == "POST":
+        formset = AuthorInlineFormset(request.POST)
+        if bookform.is_valid() and formset.is_valid():
+            book = bookform.save()
+            for form in formset:
+                author = form.save(commit=False)
+                author.book = book
+                author.save()
+            return HttpResponse("<h1>It worked not as expected</h1>")
+    return render(request, template_name, {"bookform": bookform, "formset": formset,})
+
+
+def authorinlineview(request, book_id):
+    book = Book.objects.get(pk=book_id)
+    template_name = "formset_app/create_author_inline.html"
+    heading_message = "Inline Formset Demo"
+    # if request.method == "GET":
+    #     formset = AuthorInlineFormset(instance=book)
+    if request.method == "POST":
+        print(request.POST)
+        formset = AuthorInlineFormset(request.POST, instance=book)
+        if formset.is_valid():
+            print(formset)
+            formset.save()
+            # for form in formset:
+            #     author = form.save(commit=False)
+            #     author.id = book
+            #     author.save()
+
+            return HttpResponseRedirect(reverse("formset_app:inline", args=[book.id]))
+        else:
+            print(formset.errors)
+    else:
+        formset = AuthorInlineFormset(instance=book)
+    return render(
+        request, template_name, {"formset": formset, "heading": heading_message}
     )
