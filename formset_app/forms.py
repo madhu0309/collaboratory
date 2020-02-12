@@ -53,11 +53,18 @@ AuthorFormset = modelformset_factory(
 )
 
 
+class AuthorInlineForm(forms.ModelForm):
+    class Meta:
+        model = Author
+        exclude = ()
+
+
 AuthorInlineFormset = inlineformset_factory(
     Book,
     Author,
+    form=AuthorInlineForm,
     fields=("name",),
-    # can_delete=True,
+    can_delete=True,
     extra=1,
     # max_num=6,
     widgets={

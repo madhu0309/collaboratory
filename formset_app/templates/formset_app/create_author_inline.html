@@ -12,7 +12,7 @@
 	{% csrf_token %}
 	{{ formset.management_form }}
 	{% for form in formset %}
-		{{form.id}}
+	{{form.id}}
 	<div class="row form-row spacer">
 		<div class="col-2">
 			<label>Author Name:</label>
@@ -20,13 +20,27 @@
 		<div class="col-4">
 			<div class="input-group">
 				&nbsp;{{form.name}}
+				&nbsp;{{form.DELETE}}
 				<div class="input-group-addon">
-					<button class="btn btn-success add-form-row">ADD</button>
+					<button class="btn btn-danger remove-form-row del-row" formId="{{forloop.counter0}}"
+						id="data{{forloop.counter0}}">DEL</button>
 				</div>
 			</div>
 		</div>
+		{{form.errors.name}}
 	</div>
 	{% endfor %}
+	<div class=" input-group">
+		<div class="input-group-addon">
+			<button class="btn btn-success add-form-row">ADD</button>
+			<!-- <button class="btn btn-danger remove-form-row">DEL</button> -->
+		</div>
+	</div>
+	<!-- <div class="input-group">
+		<div class="input-group-addon">
+			<button class="btn btn-danger remove-form-row">DEL</button>
+		</div>
+	</div> -->
 	<div class="row spacer">
 		<div class="col-4 offset-2">
 			<button type="submit" class="btn btn-block btn-primary">Create</button>
@@ -41,6 +55,15 @@
 	integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
 	crossorigin="anonymous"></script>
 <script type="text/javascript">
+
+	// $('.del-row').click(function (e) {
+	// let checkBox = $(this).attr('data-check-btn')
+	// console.log(checkBox)
+	// $(`#id_authors-${checkBox}-DELETE`).prop('checked', true)
+	// e.preventDefault()
+
+	// })
+
 	function updateElementIndex(el, prefix, ndx) {
 		var id_regex = new RegExp('(' + prefix + '-\\d+)');
 		var replacement = prefix + '-' + ndx;
@@ -77,9 +100,10 @@
 		return false;
 	}
 	function deleteForm(prefix, btn) {
+		//debugger;
 		var total = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
 		if (total > 1) {
-			btn.closest('.form-row').remove();
+			btn.closest('.form-row').hide();
 			var forms = $('.form-row');
 			$('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
 			for (var i = 0, formCount = forms.length; i < formCount; i++) {
@@ -97,9 +121,27 @@
 	});
 	$(document).on('click', '.remove-form-row', function (e) {
 		e.preventDefault();
+		var row = $(this).attr('formId')
+		$('#id_authors-' + row + '-DELETE').prop('checked', true);
 		deleteForm('{{ formset.prefix }}', $(this));
 		return false;
 	});
+	// $('.del-row').click(function (event) {
+	// 	event.preventDefault();
+	// 	console.log(event)
+	// 	var row = $(this).attr('formId')
+	// 	$('#id_authors-' + row + '-DELETE').prop('checked', true);
+	// 	return false;
+	// });
+	//{% comment %} // function togInHtml(num, comment_id) {
+	// 	var x = document.getElementById("togid" + num);
+	// 	if (x.innerHTML === "") {
+	// 		x.innerHTML = ` <form method="POST" action="."> {% csrf_token %}{{ comment_form|crispy }}<input type='hidden' name="parent_id" value="${comment_id}"><input type='submit' name="comment_form" value='Reply' class='btn btn-default'></form>`;
+	// 	} else {
+	// 		x.innerHTML = "";
+	// 	}
+	// } 
+	//{% endcomment %}
 
 </script>
 {% endblock javascript %}

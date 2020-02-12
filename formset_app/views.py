@@ -71,6 +71,7 @@ def progview(request, programmer_id):
 #     return render(request, "formset_app/manage_album.html", {"formset": formset})
 
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
 from .forms import (
     BookFormset,
@@ -145,17 +146,18 @@ def authorinlineview(request, book_id):
     # if request.method == "GET":
     #     formset = AuthorInlineFormset(instance=book)
     if request.method == "POST":
-        print(request.POST)
+        # print(request.POST)
         formset = AuthorInlineFormset(request.POST, instance=book)
         if formset.is_valid():
-            print(formset)
+            # print(formset)
             formset.save()
             # for form in formset:
-            #     author = form.save(commit=False)
-            #     author.id = book
-            #     author.save()
-
-            return HttpResponseRedirect(reverse("formset_app:inline", args=[book.id]))
+            # author = form.save(commit=False)
+            # author.id = book
+            # author.save()
+            return HttpResponseRedirect(
+                reverse_lazy("formset_app:inline", args=(book.id,))
+            )
         else:
             print(formset.errors)
     else:
