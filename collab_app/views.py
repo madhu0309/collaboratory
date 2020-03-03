@@ -1,10 +1,9 @@
+import os
 from django.shortcuts import get_object_or_404, redirect, render
-from collab_app.models import Question, Comment
 from django.db.models import Q
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.urls import reverse, reverse_lazy
-from collab_app.forms import QuestionForm, AnswerForm, CommentForm
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic.edit import FormView, CreateView
 from django.views.generic import UpdateView, DeleteView
@@ -13,9 +12,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
-from users.models import CustomUser
 from django.contrib.contenttypes.models import ContentType
-import os
+from django.contrib.auth.decorators import login_required
+from rest_framework import viewsets
+from collab_app.forms import QuestionForm, AnswerForm, CommentForm
+from collab_app.models import Question, Comment, Answer
+from users.models import CustomUser
+from collab_app.serializers import UserSerializer
 
 # CLASS BASED VIEWS
 
@@ -186,6 +189,7 @@ def question_list_view(request):
     return render(request, "collab_app/question_list.html", context)
 
 
+@login_required
 def question_detail_view(request, question_id):
     instance = get_object_or_404(Question, pk=question_id)
     # data["comments"] = comments
@@ -197,12 +201,14 @@ def question_detail_view(request, question_id):
     context = {}
     initial_data = {"content_type": instance.get_content_type, "object_id": instance.id}
     # import pdb;pdb.set_trace()
+    comment_form_var = CommentForm()
     if request.method == "GET":
         answer_form_var = AnswerForm(request.GET or None)
         comment_form_var = CommentForm(request.GET or None, initial=initial_data)
-    elif request.method == "POST":
+    if request.method == "POST":
         answer_form_var = AnswerForm(request.POST or None)
-        if "answer_form" in request.POST:
+        comment_form_var = CommentForm(request.POST or None, initial=initial_data)
+        if "answer-form" in request.POST:
             if answer_form_var.is_valid():
                 quest = answer_form_var.save(commit=False)
                 quest.question = instance
@@ -216,8 +222,8 @@ def question_detail_view(request, question_id):
                         request, f"{msg}: {answer_form_var.error_messages[msg]}"
                     )
 
-        elif "comment_form" in request.POST:
-            comment_form_var = CommentForm(request.POST or None, initial=initial_data)
+        elif "comment-form" in request.POST:
+            print(comment_form_var)
             if comment_form_var.is_valid():
                 # form = form.save(commit=False)
                 print(comment_form_var.cleaned_data)
@@ -259,6 +265,8 @@ def question_detail_view(request, question_id):
                 return HttpResponseRedirect(
                     reverse("collab_app:question-detail", args=[instance.id])
                 )
+            else:
+                print(comment_form_var.errors)
     comments = instance.comments
     context = {
         "instance": instance,
@@ -396,3 +404,32 @@ def add_comment_view(request):
 
 def get_env(request):
     return HttpResponse(str(os.environ.items()))
+
+
+# REST FRAMEWORK
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited 
+    """
+
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+
+
+def upvote(request,answer_id):
+    print(answer_id)
+    answer = Answer.objects.get(pk=answer_id)
+    question_id = answer.question_id
+    x = answer.votes.up(request.user.id)
+    print(x)
+    return HttpResponseRedirect(reverse("collab_app:question-detail", args=[question_id]))
+
+def downvote(request,answer_id):
+    print(answer_id)
+    answer = Answer.objects.get(pk=answer_id)
+    question_id = answer.question_id
+    x = answer.votes.down(request.user.id)
+    print(x)
+    return HttpResponseRedirect(reverse("collab_app:question-detail", args=[question_id]))

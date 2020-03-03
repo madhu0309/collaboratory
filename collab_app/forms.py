@@ -1,14 +1,21 @@
 from collab_app import models
 from django import forms
-
+from pagedown.widgets import PagedownWidget
 
 class AnswerForm(forms.ModelForm):
     """AnswerForm definition."""
+    answer_text = forms.CharField(widget=PagedownWidget())
 
     class Meta:
         model = models.Answer
         fields = ("answer_text",)
         # label=mark_safe('my label<br />next line'
+
+    # class Media:
+    #     css = {
+    #         'all': ('custom/stylesheets.css',)
+    #     }
+    #     js = ('custom/javascript.js',)
 
     def clean_answer_text(self):
         answer_text = self.cleaned_data.get("answer_text")

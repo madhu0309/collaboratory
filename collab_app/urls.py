@@ -3,13 +3,19 @@ from django.urls import path, include
 from collab_app import views
 from users.views import HomePageView
 from django.conf.urls import url
+from rest_framework import routers
+
 
 app_name = "collab_app"
+
+router = routers.DefaultRouter()
+router.register(r"users", views.UserViewSet)
+
 
 # Class Based Views
 urlpatterns = [
     # path("", views.QuestionListView.as_view(), name="question-list"),
-    url(r"^collab/$", views.question_list_view, name="question-list"),
+    path("", views.question_list_view, name="question-list"),
     # path("", views.question_list_view, name="question-list"),
     path(
         "detail/<int:question_id>/", views.question_detail_view, name="question-detail"
@@ -26,8 +32,12 @@ urlpatterns = [
     path(
         "<slug:slug>/delete", views.QuestionDeleteView.as_view(), name="question-delete"
     ),
+    path("upvote/<int:answer_id>/", views.upvote, name="upvotes"),
+    path("downvote/<int:answer_id>/", views.downvote, name="downvotes"),
     path("comment/", views.add_comment_view, name="add-comment"),
     path("env/", views.get_env, name="env"),
+    path("", include(router.urls)),
+    path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
 ]
 
 # Function_Based_Views

@@ -9,7 +9,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.translation import gettext as _
-
+from vote.models import VoteModel
 # Create your models here.
 
 
@@ -119,7 +119,7 @@ def pre_save_receiver(sender, instance, *args, **kwargs):
 pre_save.connect(pre_save_receiver, sender=Question)
 
 
-class Answer(models.Model):
+class Answer(VoteModel ,models.Model):
     question = models.ForeignKey(
         Question,
         on_delete=models.CASCADE,
@@ -128,7 +128,7 @@ class Answer(models.Model):
         related_name="question_answer",
     )
     answer_text = models.TextField()
-    votes = models.IntegerField(default=0, blank=True)
+    #votes = models.IntegerField(default=0, blank=True)
     comments = GenericRelation(Comment, related_query_name="answer")
 
     def __str__(self):

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "collab_app.apps.CollabAppConfig",
     "users.apps.UsersConfig",
     "formset_app.apps.FormsetAppConfig",
+    "snippets.apps.SnippetsConfig",
     # external packages
     "crispy_forms",
     "django_extensions",
@@ -53,6 +54,10 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.github",
     "django_bootstrap_dynamic_formsets",
     "bootstrap3",
+    "rest_framework",
+    "markdown_deux",
+    "vote",
+    "pagedown.apps.PagedownConfig",
     # "staticfiles",
     # "dynamic_formsets",
     # "haystack",
@@ -149,17 +154,17 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-# STATICFILES_FINDERS = [
-#     "django.contrib.staticfiles.finders.FileSystemFinder",
-#     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-# ]
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+]
 
 AUTH_USER_MODEL = "users.CustomUser"
 
-LOGIN_REDIRECT_URL = "home"
+LOGIN_REDIRECT_URL = "users:home"
 
 # LOGOUT_REDIRECT_URL = "home"
-ACCOUNT_LOGOUT_REDIRECT = "home"
+ACCOUNT_LOGOUT_REDIRECT = "users:home"
 
 # django-allauth config
 SITE_ID = 1
@@ -169,7 +174,13 @@ AUTHENTICATION_BACKENDS = (
     "allauth.account.auth_backends.AuthenticationBackend",
 )
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = os.getenv('USER')
+EMAIL_HOST_PASSWORD = os.getenv('PASSWORD')
+EMAIL_PORT = 587
 
 ACCOUNT_SESSION_REMEMBER = True
 
@@ -185,3 +196,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 
 DEFAULT_FROM_EMAIL = "admin@collaboratory.com"
 
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+}

@@ -97,7 +97,7 @@ def create_book_normal(request):
                 name = form.cleaned_data.get("name")
                 if name:
                     Book(name=name).save()
-            return HttpResponse("<h1>It worked not as expected</h1>")
+            return HttpResponseRedirect(reverse("formset_app:normal"))
 
     return render(
         request, template_name, {"formset": formset, "heading": heading_message,}
@@ -115,7 +115,7 @@ def create_book_model_form(request):
             for form in formset:
                 if form.cleaned_data.get("name"):
                     form.save()
-            return HttpResponse("<h1>It worked not as expected</h1>")
+            return HttpResponseRedirect(reverse("formset_app:model"))
 
     return render(
         request, template_name, {"formset": formset, "heading": heading_message,}
@@ -135,7 +135,7 @@ def create_book_with_authors(request):
                 author = form.save(commit=False)
                 author.book = book
                 author.save()
-            return HttpResponse("<h1>It worked not as expected</h1>")
+            return HttpResponseRedirect(reverse("formset_app:model_with_authors"))
     return render(request, template_name, {"bookform": bookform, "formset": formset,})
 
 
