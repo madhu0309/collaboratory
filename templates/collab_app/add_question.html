@@ -3,8 +3,9 @@
 {% load socialaccount %}
 {% load crispy_forms_tags %}
 {% block title %}Collab{% endblock title %} 
+{% block extra_head %}{{ form.media }}{% endblock %}
 {% block content %}
-  <div class="container">
+  <div class="form-group">
     <form method="POST" novalidate>
       {% csrf_token %}
       {{ form|crispy }}

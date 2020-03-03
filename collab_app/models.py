@@ -9,10 +9,13 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.translation import gettext as _
+from six import python_2_unicode_compatible
 from vote.models import VoteModel
+from hitcount.models import HitCountMixin, HitCount
+
 # Create your models here.
 
-
+@python_2_unicode_compatible
 class CommentManager(models.Manager):
     def all(self):
         qs = super(CommentManager, self).filter(parent=None)
@@ -78,6 +81,7 @@ class Question(models.Model):
         get_user_model(), on_delete=models.CASCADE, null=True
     )
     comments = GenericRelation(Comment, related_query_name="question")
+    hit_count_generic = GenericRelation(HitCount, object_id_field='object_pk',related_query_name='hit_count_generic_relation')
 
     def __str__(self):
         return self.question_title[:10]

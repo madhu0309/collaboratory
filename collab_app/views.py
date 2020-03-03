@@ -19,6 +19,7 @@ from collab_app.forms import QuestionForm, AnswerForm, CommentForm
 from collab_app.models import Question, Comment, Answer
 from users.models import CustomUser
 from collab_app.serializers import UserSerializer
+from hitcount.views import HitCountDetailView
 
 # CLASS BASED VIEWS
 
@@ -66,38 +67,44 @@ class QuestionListView(ListView):
         return context
 
 
-class QuestionDetailView(FormView, DetailView):
+class QuestionDetailView(HitCountDetailView):
     model = Question
-    form_class = AnswerForm
+    #form_class = AnswerForm
     template_name = "collab_app/question_detail.html"
+    slug_url_kwarg = 'slug'
+    query_pk_and_slug = True
+    # set to True to count the hit
+    count_hit = True
 
     def get_context_data(self, **kwargs):
         context = super(QuestionDetailView, self).get_context_data(**kwargs)
-        print(self)
-        print(context)
+        context.update({
+            'popular_questions': Question.objects.order_by('-hit_count_generic_hits')[:3],
+        })
         if "slug" in self.kwargs:
-            context["object"] = get_object_or_404(Question, slug=self.kwargs["slug"])
-        context["form"] = self.get_form()
+            context["instance"] = get_object_or_404(Question, slug=self.kwargs["slug"])
+            context["answer_form"] = AnswerForm()
+            context["comment_form"] = CommentForm()
+        #context["form"] = self.get_form()
         return context
 
-    def form_valid(self, form):
-        print("+++++++++++++++++")
-        print(self.slug_url_kwarg)
-        print(self.get_slug_field)
-        print(self.slug_url_kwarg)
-        print(self.get_object().slug)
-        print("++++++++++++++++++")
-        instance = form.save(commit=False)
-        instance.question = Question.objects.get(slug=self.get_object().slug)
-        instance.save()
-        return HttpResponseRedirect(
-            reverse("collab_app:question-detail", args=[self.get_object().slug])
-        )
+    # def form_valid(self, form):
+    #     print("+++++++++++++++++")
+    #     print(self.slug_url_kwarg)
+    #     print(self.get_slug_field)
+    #     print(self.slug_url_kwarg)
+    #     print(self.get_object().slug)
+    #     print("++++++++++++++++++")
+    #     instance = form.save(commit=False)
+    #     instance.question = Question.objects.get(slug=self.get_object().slug)
+    #     instance.save()
+    #     return HttpResponseRedirect(
+    #         reverse("collab_app:question-detail", args=[self.get_object().slug])
+    #     )
 
 
-class QuestionCreate(LoginRequiredMixin, CreateView):
-    model = Question
-    fields = ["question_title", "question_body"]
+class QuestionCreateView(LoginRequiredMixin, CreateView):
+    form_class = QuestionForm
     template_name = "collab_app/add_question.html"
 
     def form_valid(self, form):
@@ -105,6 +112,27 @@ class QuestionCreate(LoginRequiredMixin, CreateView):
         instance.created_by = self.request.user
         instance.save()
         return HttpResponseRedirect(reverse("collab_app:question-list"))
+
+class AnswerCreateView(LoginRequiredMixin, CreateView):
+    form_class = AnswerForm
+    template_name = "collab_app/question_detail.html"
+    # slug_url_kwarg = 'slug'
+    # query_pk_and_slug = True
+
+    def form_valid(self, form):
+        instance = form.save(commit=False)
+        #instance.created_by = self.request.user
+        question = Question.objects.get(pk=self.kwargs['pk'])
+        instance.question = question 
+        instance.save()
+        # args = [question.slug]
+        # print(args)
+        url = reverse('collab_app:question-detail', kwargs={'slug': question.slug})
+        return HttpResponseRedirect(url)
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    form_class = CommentForm
+    template_name = "collab_app/question_detail.html"
 
 
 class QuestionUpdateView(LoginRequiredMixin, UpdateView):

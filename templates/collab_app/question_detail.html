@@ -19,7 +19,7 @@
 						{{ instance.question_title }}
 					</div>
 					<div class="card-body">
-						<p class="card-text">{{ instance.question_body }}</p>
+						<p class="card-text">{{ instance.question_body|markdown }}</p>
 					</div>
 				</div>
 				{% for answer in instance.question_answer.all %}
@@ -40,7 +40,7 @@
 							</div>
 						</div>
 						<div class="p-2 flex-grow-1" id="anSWER{{ forloop.counter }}">
-							{{ answer.answer_text|markdown|linebreaks }}
+							{{ answer.answer_text|markdown }}
 							<input type="hidden" name="as" value="{{answer.answer_text}}"
 								id="hanSWER{{ forloop.counter }}">
 						</div>
@@ -51,7 +51,7 @@
 				</div>
 				{% endfor %}
 				<div class="form-group">
-					<form method="post" action="{% url "collab_app:question-detail" instance.id%}" novalidate>
+					<form method="post" action="{% url "collab_app:add-answer" instance.id %}" novalidate>
 						{% csrf_token %}
 						{{ answer_form|crispy }}
 						<input type="submit" name="answer-form">
@@ -128,26 +128,6 @@
 		} else {
 			x.innerHTML = "";
 		}
-	}
-
-	function copyClipboard(ele) {
-
-		console.log(ele)
-		var copyText = document.getElementById('anSWER' + ele);
-		var hCopyText = document.getElementById('hanSWER' + ele)
-		console.log(hCopyText)
-		hCopyText.select()
-		// hCopyText.setSelectionRange(0, 99999)
-		// hCopyText.focus()
-		document.execCommand("copy");
-		// console.log(copyText.focus())
-		// //copyText.select()
-		// //copyText.setSelectionRange(0, 99999)
-		// console.log(copyText.textContent.trim())
-		// //y = x.execCommand("copy");
-		// //console.log(y)
-		// document.execCommand("copy");
-		//alert("Copied the text: " + copyText.textContent);
 	}
 
 	function CopyToClipboard(containerid) {

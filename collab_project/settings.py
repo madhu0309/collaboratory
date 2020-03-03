@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "markdown_deux",
     "vote",
     "pagedown.apps.PagedownConfig",
+    "hitcount",
     # "staticfiles",
     # "dynamic_formsets",
     # "haystack",

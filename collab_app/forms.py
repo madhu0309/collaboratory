@@ -26,10 +26,9 @@ class AnswerForm(forms.ModelForm):
 
 class QuestionForm(forms.ModelForm):
     """Form definition for Question."""
-
+    question_body = forms.CharField(widget=PagedownWidget())
     class Meta:
         """Meta definition for Questionform."""
-
         model = models.Question
         fields = ("question_title", "question_body")
         # widgets = {
@@ -46,7 +45,7 @@ class QuestionForm(forms.ModelForm):
 class CommentForm(forms.ModelForm):
     content_type = forms.CharField(widget=forms.HiddenInput)
     object_id = forms.IntegerField(widget=forms.HiddenInput)
-    message = forms.CharField(label="", widget=forms.Textarea)
+    message = forms.CharField(label="", widget=forms.Textarea(attrs={'rows':2}))
     # parent_id = forms.IntegerField(widget=forms.HiddenInput, required=False)
     # comment_id = forms.IntegerField()
 

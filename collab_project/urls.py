@@ -26,7 +26,7 @@ urlpatterns = [
     # Local apps
     path("accounts/", include("allauth.urls")),
     path("", include("users.urls")),
-    path("collab/collab/", include("collab_app.urls"),),  # , "collab_app")),
+    path("collab/", include("collab_app.urls"),),  # , "collab_app")),
     path("formset/", include("formset_app.urls"),),
     path("snippets/", include("snippets.urls")),
 ]
