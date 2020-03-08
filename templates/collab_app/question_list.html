@@ -12,7 +12,6 @@
 {% for question in question_lists %}
 <div class="list-group">
     <div class="list-group-item">
-        <a href="{% url 'collab_app:question-detail' question.slug %}">{{ question.question_title }}</a>
         <div class="float-right">
             <a href="#" class="btn btn-info edit" title="View"><i class="fas fa-eye"></i></a>
             <a href="{% url 'collab_app:question-update' question.slug %}" class="btn btn-success edit" title="Edit"><i
@@ -20,8 +19,23 @@
             <a href="{% url 'collab_app:question-delete' question.slug %}" class="btn btn-danger delete remove_account"
                 title="Delete"><i class="fas fa-trash"></i></a>
         </div>
-        <p style="font-size: 12px;">{{ question.created_by }}</p>
-        <p style="font-size: 12px;">{% get_hit_count for question %}</p>
+        <div class="d-flex">
+            <div class="p-2">
+                <p style="font-size: 24px; color:grey;">{% get_hit_count for question %}</p>
+                <p style="font-size: 12px; color:grey; margin-top:-15px; margin-left:-5px;">votes</p>
+            </div>
+            <div class=" p-2">
+                <p style="font-size: 24px; color:grey;">{{question.question_answer.count}}</p>
+                <p style="font-size: 12px; color:grey; margin-top:-15px; margin-left:-10px;">
+                    answers</p>
+            </div>
+            <div class=" p-2">
+                <p style="font-size: 24px; color:grey;">{% get_hit_count for question %}</p>
+                <p style="font-size: 12px; color:grey; margin-top:-15px; margin-left:-6px;">views</p>
+            </div>
+            <a href=" {% url 'collab_app:question-detail' question.slug %}">{{ question.question_title }}</a>
+            <p style="font-size: 12px;">{{ question.created_by }}</p>
+        </div>
     </div>
 </div>
 

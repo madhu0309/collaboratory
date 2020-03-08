@@ -15,6 +15,7 @@ from hitcount.models import HitCountMixin, HitCount
 
 # Create your models here.
 
+
 @python_2_unicode_compatible
 class CommentManager(models.Manager):
     def all(self):
@@ -71,17 +72,21 @@ class Comment(models.Model):
         return True
 
 
-class Question(models.Model):
+class Question(VoteModel, models.Model):
     question_title = models.CharField(max_length=300)
     slug = models.SlugField(max_length=255, null=True, blank=True)
     question_body = models.TextField()
     pub_date = models.DateTimeField(auto_now_add=True)
-    votes = models.IntegerField(default=0, blank=True)
+    # votes = models.IntegerField(default=0, blank=True)
     created_by = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, null=True
     )
     comments = GenericRelation(Comment, related_query_name="question")
-    hit_count_generic = GenericRelation(HitCount, object_id_field='object_pk',related_query_name='hit_count_generic_relation')
+    hit_count_generic = GenericRelation(
+        HitCount,
+        object_id_field="object_pk",
+        related_query_name="hit_count_generic_relation",
+    )
 
     def __str__(self):
         return self.question_title[:10]
@@ -123,7 +128,7 @@ def pre_save_receiver(sender, instance, *args, **kwargs):
 pre_save.connect(pre_save_receiver, sender=Question)
 
 
-class Answer(VoteModel ,models.Model):
+class Answer(VoteModel, models.Model):
     question = models.ForeignKey(
         Question,
         on_delete=models.CASCADE,
@@ -132,7 +137,7 @@ class Answer(VoteModel ,models.Model):
         related_name="question_answer",
     )
     answer_text = models.TextField()
-    #votes = models.IntegerField(default=0, blank=True)
+    # votes = models.IntegerField(default=0, blank=True)
     comments = GenericRelation(Comment, related_query_name="answer")
 
     def __str__(self):
@@ -141,4 +146,3 @@ class Answer(VoteModel ,models.Model):
     # commented_by = models.ForeignKey(
     #     get_user_model(), on_delete=models.CASCADE, null=True
     # )
-

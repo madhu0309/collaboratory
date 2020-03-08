@@ -5,13 +5,11 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.views.generic.edit import FormView, CreateView
+from django.views.generic.edit import FormView, CreateView, FormMixin
 from django.views.generic import UpdateView, DeleteView
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import Paginator
-from django.core.paginator import EmptyPage
-from django.core.paginator import PageNotAnInteger
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
@@ -20,11 +18,49 @@ from collab_app.models import Question, Comment, Answer
 from users.models import CustomUser
 from collab_app.serializers import UserSerializer
 from hitcount.views import HitCountDetailView
+from django.http import JsonResponse
+from braces.views import JSONResponseMixin, AjaxResponseMixin
 
 # CLASS BASED VIEWS
 
 
-class QuestionListView(ListView):
+# class AjaxableResponseMixin:
+#     """
+#     Mixin to add AJAX support to a form.
+#     Must be used with an object-based FormView (e.g. CreateView)
+#     """
+
+#     print("something")
+#     print("==================================")
+
+#     def form_invalid(self):
+#         # response = super().form_invalid(form)
+#         if self.request.is_ajax():
+#             return JsonResponse(status=400)
+#         else:
+#             return HttpResponse("<h1>Invalid</h1>")
+
+#     def form_valid(self):
+#         # We make sure to call the parent's form_valid() method because
+#         # it might do some processing (in the case of CreateView, it will
+#         # call form.save() for example).
+#         # response = super().form_valid(form)
+#         if self.request.is_ajax():
+#             queryset = Question.objects.filter(
+#                 question_title__icontains=self.request.GET.get("search", None)
+#             )
+#             list = []
+#             for i in queryset:
+#                 list.append(i.question_title)
+#             data = {
+#                 "list": self,
+#             }
+#             return JsonResponse(data)
+#         else:
+#             return HttpResponse("<h1>not worked</h1>")
+
+
+class QuestionListView(JSONResponseMixin, AjaxResponseMixin, ListView):
     model = Question
     context_object_name = "question_list"
     template_name = "collab_app/question_list.html"
@@ -42,11 +78,11 @@ class QuestionListView(ListView):
     def get_context_data(self, **kwargs):
         # search_key =
         context = super(QuestionListView, self).get_context_data(**kwargs)
-
         if self.request.GET.get("q") != None:
             query = self.request.GET.get("q")
             question_list = Question.objects.filter(
-                Q(question_title__icontains=query)  # | Q(author__icontains=query)
+                # | Q(author__icontains=query)
+                Q(question_title__icontains=query)
             )
         else:
             question_list = Question.objects.all()
@@ -66,26 +102,44 @@ class QuestionListView(ListView):
             context["search"] = self.request.GET.get("q")
         return context
 
+    # def form_valid(self, form):
+    #     return HttpResponse("<h2>hello world</h2>")
+    def get_ajax(self, request, *args, **kwargs):
+        queryset = Question.objects.filter(
+            question_title__icontains=self.request.GET.get("search", None)
+        )
+        list = []
+        for i in queryset:
+            list.append(i.question_title)
+        data = {
+            "list": list,
+        }
+        return self.render_json_response(data)
+
 
 class QuestionDetailView(HitCountDetailView):
     model = Question
-    #form_class = AnswerForm
+    # form_class = AnswerForm
     template_name = "collab_app/question_detail.html"
-    slug_url_kwarg = 'slug'
+    slug_url_kwarg = "slug"
     query_pk_and_slug = True
     # set to True to count the hit
     count_hit = True
 
     def get_context_data(self, **kwargs):
         context = super(QuestionDetailView, self).get_context_data(**kwargs)
-        context.update({
-            'popular_questions': Question.objects.order_by('-hit_count_generic_hits')[:3],
-        })
+        context.update(
+            {
+                "popular_questions": Question.objects.order_by(
+                    "-hit_count_generic_hits"
+                )[:3],
+            }
+        )
         if "slug" in self.kwargs:
             context["instance"] = get_object_or_404(Question, slug=self.kwargs["slug"])
             context["answer_form"] = AnswerForm()
             context["comment_form"] = CommentForm()
-        #context["form"] = self.get_form()
+        # context["form"] = self.get_form()
         return context
 
     # def form_valid(self, form):
@@ -113,6 +167,7 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
         instance.save()
         return HttpResponseRedirect(reverse("collab_app:question-list"))
 
+
 class AnswerCreateView(LoginRequiredMixin, CreateView):
     form_class = AnswerForm
     template_name = "collab_app/question_detail.html"
@@ -121,18 +176,146 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         instance = form.save(commit=False)
-        #instance.created_by = self.request.user
-        question = Question.objects.get(pk=self.kwargs['pk'])
-        instance.question = question 
+        # instance.created_by = self.request.user
+        question = Question.objects.get(pk=self.kwargs["pk"])
+        instance.question = question
         instance.save()
         # args = [question.slug]
         # print(args)
-        url = reverse('collab_app:question-detail', kwargs={'slug': question.slug})
+        url = reverse("collab_app:question-detail", kwargs={"slug": question.slug})
         return HttpResponseRedirect(url)
+
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
     form_class = CommentForm
     template_name = "collab_app/question_detail.html"
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(CommentCreateView, self).get_context_data(**kwargs)
+    #     return context
+
+    def get_context_data(self, **kwargs):
+        context = super(QuestionDetailView, self).get_context_data(**kwargs)
+        if "pk" in self.kwargs:
+            context["instance"] = get_object_or_404(Question, pk=self.kwargs["pk"])
+        # context["form"] = self.get_form()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.kwargs["question"] = get_object_or_404(Question, pk=self.kwargs["pk"])
+        print(self.kwargs["question"])
+        # context["instance"] = question
+        # initial_data = {
+        #     "content_type": question.get_content_type,
+        #     "object_id": question.id,
+        # }
+        # context["initial_data"] = initial_data
+        if "comment-form" in request.POST:
+            question = self.kwargs["question"]
+            print("======================")
+            print(question.id)
+            print("======================")
+            comment_form_var = CommentForm(request.POST or None)
+            if comment_form_var.is_valid():
+                print(comment_form_var)
+                print(self)
+                print(dir(self))
+                print(
+                    "------------------------initial---------------------------------"
+                )
+                print(self.initial)
+                # print(self.instance)
+                print(self.kwargs["question"])
+                # form = form.save(commit=False)
+                print(comment_form_var.cleaned_data)
+                # c_type = comment_form_var.cleaned_data.get("content_type")
+                # import pdb;pdb.set_trace()
+                # c_type = comment_form_var.cleaned_data.get("content_type")
+                # content_type = question.get_content_type
+                # object_id = question.id
+                content_type = question.get_content_type
+                c_type = str(content_type)
+                print(c_type)
+                # import pbd;pdb.set_trace()
+                content_type = ContentType.objects.get(
+                    app_label=c_type.split()[0], model=c_type.split()[2]
+                )
+                # obj_id = comment_form_var.cleaned_data.get("object_id")
+                object_id = question.id
+                obj_id = object_id
+                message = comment_form_var.cleaned_data.get("message")
+                parent_obj = None
+                try:
+                    parent_id = int(request.POST.get("parent_id"))
+                except:
+                    parent_id = None
+
+                if parent_id:
+                    parent_qs = Comment.objects.filter(id=parent_id)
+                    if parent_qs.exists() and parent_qs.count() == 1:
+                        parent_obj = parent_qs.first()
+
+                comm = comment_form_var.save(commit=False)
+                comm.user = request.user
+                comm.content_type = content_type
+                comm.object_id = obj_id
+                comm.message = message
+                comm.parent = parent_obj
+                comm.save()
+            # return HttpResponseRedirect(
+            #     reverse("collab_app:question-detail", args=[instance.id])
+            # )
+            return HttpResponse(
+                "<h1>form is valid .. this is just an HttpResponse object</h1>"
+            )
+
+    # def form_valid(self, form):
+    #     # import pdb;pdb.set_trace()
+    #     comment_form_var = CommentForm(request.POST or None, initial=initial_data)
+    #     c_type = comment_form_var.cleaned_data.get("content_type")
+    #     content_type = ContentType.objects.get(
+    #         app_label=c_type.split()[0], model=c_type.split()[2]
+    #     )
+    #     print(content_type)
+    #     obj_id = comment_form_var.cleaned_data.get("object_id")
+    #     message = comment_form_var.cleaned_data.get("message")
+    #     parent_obj = None
+    #     try:
+    #         parent_id = int(request.POST.get("parent_id"))
+    #     except:
+    #         parent_id = None
+
+    #     if parent_id:
+    #         parent_qs = Comment.objects.filter(id=parent_id)
+    #         if parent_qs.exists() and parent_qs.count() == 1:
+    #             parent_obj = parent_qs.first()
+    #     comment = form.save(commit=False)
+    #     comment.user = request.user
+    #     comment.content_type = content_type
+    #     comment.object_id = obj_id
+    #     comment.message = message
+    #     comment.parent = parent_obj
+    #     comment.save()
+
+    #     # new_comment, created = Comment.objects.get_or_create(
+    #     #     user=request.user,
+    #     #     content_type=content_type,
+    #     #     object_id=obj_id,
+    #     #     message=message,
+    #     #     parent=parent_obj,
+    #     # )
+    #     # if created:
+    #     #     print("Yeah created")
+    #     return HttpResponseRedirect(
+    #         reverse("collab_app:question-detail", args=[instance.id])
+    #     )
+
+    def form_invalid(self, form):
+        print(form.errors)
+        print("form is invalid")
+        return HttpResponse(
+            "<h1>form is invalid.. this is just an HttpResponse object</h1>"
+        )
 
 
 class QuestionUpdateView(LoginRequiredMixin, UpdateView):
@@ -446,18 +629,36 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
-def upvote(request,answer_id):
-    print(answer_id)
-    answer = Answer.objects.get(pk=answer_id)
-    question_id = answer.question_id
-    x = answer.votes.up(request.user.id)
-    print(x)
-    return HttpResponseRedirect(reverse("collab_app:question-detail", args=[question_id]))
+def ques_upvote(request, question_id):
+    question = Question.objects.get(pk=question_id)
+    question.votes.up(request.user.id)
+    return HttpResponseRedirect(
+        reverse("collab_app:question-detail", args=[question.slug])
+    )
 
-def downvote(request,answer_id):
-    print(answer_id)
+
+def ques_downvote(request, question_id):
+    question = Question.objects.get(pk=question_id)
+    question.votes.down(request.user.id)
+    return HttpResponseRedirect(
+        reverse("collab_app:question-detail", args=[question.slug])
+    )
+
+
+def upvote(request, answer_id):
     answer = Answer.objects.get(pk=answer_id)
     question_id = answer.question_id
-    x = answer.votes.down(request.user.id)
-    print(x)
-    return HttpResponseRedirect(reverse("collab_app:question-detail", args=[question_id]))
+    answer.votes.up(request.user.id)
+    return HttpResponseRedirect(
+        reverse("collab_app:question-detail", args=[answer.question.slug])
+    )
+
+
+def downvote(request, answer_id):
+    answer = Answer.objects.get(pk=answer_id)
+    question_id = answer.question_id
+    answer.votes.down(request.user.id)
+    return HttpResponseRedirect(
+        reverse("collab_app:question-detail", args=[answer.question.slug])
+    )
+

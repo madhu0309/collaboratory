@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     "formset_app.apps.FormsetAppConfig",
     "snippets.apps.SnippetsConfig",
     # external packages
+    "django_celery_beat",
+    "django_celery_results",
     "crispy_forms",
     "django_extensions",
     "allauth",
@@ -178,9 +180,9 @@ AUTHENTICATION_BACKENDS = (
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = os.getenv('USER')
-EMAIL_HOST_PASSWORD = os.getenv('PASSWORD')
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = os.getenv("USER")
+EMAIL_HOST_PASSWORD = os.getenv("PASSWORD")
 EMAIL_PORT = 587
 
 ACCOUNT_SESSION_REMEMBER = True
@@ -201,3 +203,23 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
 }
+
+# HAYSTACK_CONNECTIONS = {
+#     "default": {
+#         "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch2SearchEngine",
+#         "URL": "http://127.0.0.1:9200/",
+#         "INDEX_NAME": "haystack",
+#     },
+# }
+
+HAYSTACK_CONNECTIONS = {
+    "default": {"ENGINE": "haystack.backends.simple_backend.SimpleEngine",},
+}
+
+
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE

@@ -13,100 +13,129 @@
 	</div>
 	<div class="col-lg-11">
 		<div class="row">
-			<div class="col-lg-10">
-				<div class="card">
-					<div class="card-header">
-						{{ instance.question_title }}
-					</div>
-					<div class="card-body">
-						<p class="card-text">{{ instance.question_body|markdown }}</p>
-					</div>
-				</div>
-				{% for answer in instance.question_answer.all %}
-				<div class="card">
-					<div class="d-flex">
-						<div class="p-2">
-							<div style="margin-left: 5px;">
-								<a class="upvoteclass" user_Id={{ request.user.id }} id="{{forloop.counter}}"
-									href="{% url 'collab_app:upvotes' answer.id %}"><i
-										class="fa fa-caret-up fa-2x"></i></a>
-							</div>
-							<div style="margin-left: 10px;">
-								{{ answer.votes.count }}
-							</div>
-							<div style="margin-left: 5px;">
-								<a id="votedown" href="{% url 'collab_app:downvotes' answer.id%}"><i
-										class="fa fa-caret-down fa-2x"></i></a>
-							</div>
+			<div class="col-lg-12">
+				<div class="d-flex">
+					<div class="p-2">
+						<div style="margin-left: 5px;">
+							<a class="upvoteclass" user_Id={{ request.user.id }}"
+								href="{% url 'collab_app:ques-upvote' instance.id%}"><i
+									class="fa fa-caret-up fa-2x"></i></a>
 						</div>
-						<div class="p-2 flex-grow-1" id="anSWER{{ forloop.counter }}">
-							{{ answer.answer_text|markdown }}
-							<input type="hidden" name="as" value="{{answer.answer_text}}"
-								id="hanSWER{{ forloop.counter }}">
+						<div style="margin-left: 10px;">
+							{{ instance.votes.count }}
 						</div>
-						<div class="p-2 ml-auto">
-							<button onclick="CopyToClipboard('anSWER{{ forloop.counter }}')">Copy text</button>
+						<div style="margin-left: 5px;">
+							<a id="votedown" href="{% url 'collab_app:ques-downvote' instance.id%}"><i
+									class="fa fa-caret-down fa-2x"></i></a>
 						</div>
 					</div>
+					<div class="p-2 flex-grow-1">
+						<p style=" font-size: 24px;">{{ instance.question_title }}</p>
+					</div>
 				</div>
-				{% endfor %}
-				<div class="form-group">
-					<form method="post" action="{% url "collab_app:add-answer" instance.id %}" novalidate>
-						{% csrf_token %}
-						{{ answer_form|crispy }}
-						<input type="submit" name="answer-form">
-					</form>
-				</div>
-				<a href="#">Type Comment Here</a>
-				<p class='lead'>Comments</p>
-				{% if request.user.is_authenticated %}
-				<form method="POST" action="."> {% csrf_token %}
-					{{ comment_form|crispy }}
-					<input type='submit' name="comment-form" value='Post comment' class='btn btn-default'>
-				</form>
-				{% else %}
-				<p>You must login to comment </p>
-				{% endif %}
-				<hr />
-				{% for comment in comments %}
+				<hr>
+			</div>
+			<div class=" col-lg-10">
+				<div class="row">
+					<div class="col-lg-10">
+						<div class="blockquote">
+							<p>{{ instance.question_body|markdown }}</p>
+						</div>
+						<hr>
+						{% for answer in instance.question_answer.all %}
+						<div class="d-flex">
+							<div class="p-2">
+								<div style="margin-left: 5px;">
+									<a class="upvoteclass" user_Id={{ request.user.id }} id="{{forloop.counter}}"
+										href="{% url 'collab_app:upvotes' answer.id %}"><i
+											class="fa fa-caret-up fa-2x"></i></a>
+								</div>
+								<div style="margin-left: 10px;">
+									{{ answer.votes.count }}
+								</div>
+								<div style="margin-left: 5px;">
+									<a id="votedown" href="{% url 'collab_app:downvotes' answer.id%}"><i
+											class="fa fa-caret-down fa-2x"></i></a>
+								</div>
+							</div>
+							<div class="p-2 flex-grow-1" id="anSWER{{ forloop.counter }}">
+								{{ answer.answer_text|markdown }}
+								<input type="hidden" name="as" value="{{answer.answer_text}}"
+									id="hanSWER{{ forloop.counter }}">
+							</div>
+							<div class="p-2 ml-auto">
+								<button onclick="CopyToClipboard('anSWER{{ forloop.counter }}')">Copy
+									text</button>
+							</div>
+						</div>
+						<hr>
+						{% endfor %}
+						<div class="form-group">
+							<form method="post" action="{% url "collab_app:add-answer" instance.id %}" novalidate>
+								{% csrf_token %}
+								{{ answer_form|crispy }}
+								<input type="submit" name="answer-form">
+							</form>
+						</div>
 
-				<div class="blockquote">
-					<p>{{ comment.message }}</p>
-					<footer class="blockquote-footer">via {{ comment.user }} | {{ comment.timestamp|timesince }} ago |
-						{% if comment.children.count > 0 %}{{ comment.children.count }}
-						Comment{% if comment.children.count > 1 %}s{% endif %} | {% endif %} <a href='#'>Reply</a>
-						| <a class='' href='{{ comment.get_absolute_url }}'>Thread</a></footer>
-					<!-- style="display: none;" -->
-					{% for child_comment in comment.children.all %}
-					<div style="margin: 50px;" onclick="addSpace({{forloop.counter}})" class="blockquote">
-						<p>{{ child_comment.message }}</p>
-						<footer class="blockquote-footer">via {{ child_comment.user }} |
-							{{ child_comment.timestamp|timesince }}
-							ago
-						</footer>
-					</div>
-					{% endfor %}
-					<button onclick="togInHtml({{forloop.counter}}, {{ comment.id}})">Reply</button>
-					<div id="form{{forloop.counter}}">
-						<!-- style="display: none;" -->
-						{% if request.user.is_authenticated %}
-						<div id="togid{{forloop.counter}}">
+						<div>
+							<a href="#">Type Comment Here</a>
+							<p class='lead'>Comments</p>
+							{% if request.user.is_authenticated %}
+							<form method="POST" action="{% url "collab_app:add-comment" instance.id %}">
+								{% csrf_token %}
+								{{ comment_form|crispy }}
+								<input type='submit' name="comment-form" value='Post comment' class='btn btn-default'>
+							</form>
+							{% else %}
+							<p>You must login to comment </p>
+							{% endif %}
 						</div>
-					</div>
-					{% else %}
-					<p>You must login to comment </p>
-					{% endif %}
+						{% for comment in instance.comments %}
 
+						<div class="blockquote">
+							<p>{{ comment.message }}</p>
+							<footer class="blockquote-footer">via {{ comment.user }} |
+								{{ comment.timestamp|timesince }} ago
+								|
+								{% if comment.children.count > 0 %}{{ comment.children.count }}
+								Comment{% if comment.children.count > 1 %}s{% endif %} | {% endif %} <a class="counter"
+									href="#">Reply</a>
+								| <a class='' href='{{ comment.get_absolute_url }}'>Thread</a></footer>
+							<!-- style="display: none;" -->
+							{% for child_comment in comment.children.all %}
+							<div style="margin: 50px;" onclick="addSpace({{forloop.counter}})" class="blockquote">
+								<p>{{ child_comment.message }}</p>
+								<footer class="blockquote-footer">via {{ child_comment.user }} |
+									{{ child_comment.timestamp|timesince }}
+									ago
+								</footer>
+							</div>
+							{% endfor %}
+							<button data-toggle=" collapse" onclick="togInHtml({{forloop.counter}}, {{ comment.id}})"
+								data-target=".formCls">Reply
+							</button>
+							{% comment %} onclick="togInHtml({{forloop.counter}}, {{ comment.id}})" {% endcomment %}
+							<div id="form{{forloop.counter}}">
+								<!-- style="display: none;" -->
+								{% if request.user.is_authenticated %}
+								<!-- <div id="togid{{forloop.counter}}">
+								</div> -->
+								<p id="togid{{forloop.counter}}">hefoe</p>
+							</div>
+							{% else %}
+							<p>You must login to comment </p>
+							{% endif %}
+						</div>
+						{% endfor %}
+					</div>
+					<div class="col-lg-2">
+						4846484845456884684
+					</div>
 				</div>
 			</div>
-			<hr />
-			{% endfor %}
-		</div>
-		<div class="col-lg-3">
 		</div>
 	</div>
-</div>
-
 </div>
 {% block javascript %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -123,12 +152,21 @@
 	function togInHtml(num, comment_id) {
 		var comment_id = comment_id
 		var x = document.getElementById("togid" + num);
-		if (x.innerHTML === "") {
-			x.innerHTML = ` <form method="POST" action="."> {% csrf_token %}{{ comment_form|crispy }}<input type='hidden' name="parent_id" value="${comment_id}"><input type='submit' name="comment-form" value='Reply' class='btn btn-default'></form>`;
-		} else {
-			x.innerHTML = "";
+		console.log(x.innerHTML)
+		console.log(x.textContent)
+		if (x.textContent === "hefoe") {
+			console.log(x.textContent)
+			x.innerHTML = ` <form method="POST" action="{% url "collab_app:add-comment" instance.id %}"> {% csrf_token %}{{ comment_form|crispy }}<input type='hidden' name="parent_id" value="${comment_id}"><input type='submit' name="comment-form" value='Reply' class='btn btn-default'></form>`;
 		}
+		else {
+			x.innerHTML = "<p>hefoe<p>";
+		}
+
 	}
+
+	// $(document).ready(function () {
+	// 	$("")
+	// })
 
 	function CopyToClipboard(containerid) {
 		if (document.selection) {
