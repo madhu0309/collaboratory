@@ -7,7 +7,7 @@ Creating virtual environment
 Activating virtual environment
 > source venv/bin/activate
 
-Clone the git repository 
+Clone the git repository and move to that directory
 > git clone https://github.com/madhu0309/collaboratory.git
 
 ### Installing requirements 
