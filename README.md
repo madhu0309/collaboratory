@@ -1,9 +1,9 @@
 # collaboratory
 It tried to make a clone of stackoverflow and also tried to use formsets
 ## Getting It 
-Activating virtual environment 
+Creating virtual environment 
 > virtualenv -p python3 venv
-
+Activating virtual environment
 > source venv/bin/activate
 
 Clone the git repository 
