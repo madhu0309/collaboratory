@@ -30,8 +30,15 @@ Set mailid in the place of os.getenv("USER") and password in the place of os.get
 
 > python manage.py collectstatic
 
+### Redis
+
+Install redis server https://redis.io/download
+Run redis server
+>$ redis-server
+
+Run celery
+> celery -A collab_project worker -l info
+
 ### Run server
 
 > python manage.py runserver
-
- 
