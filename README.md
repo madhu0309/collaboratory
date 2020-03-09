@@ -16,6 +16,9 @@ Clone the git repository
 ## Run migrations 
 > python manage.py migrate
 
+## Collectstatic
+> python manage.py collectstatic
+
 ## Run server
 > python manage.py runserver
 
