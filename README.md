@@ -7,7 +7,7 @@ Activating virtual environment
 > source venv/bin/activate
 
 Clone the git repository 
-> git clone url
+> git clone https://github.com/madhu0309/collaboratory.git
 
 ## Installing requirements 
 > pip install -r requirements.txt
