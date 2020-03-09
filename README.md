@@ -33,6 +33,7 @@ Set mailid in the place of os.getenv("USER") and password in the place of os.get
 ### Redis
 
 Install redis server https://redis.io/download
+
 Run redis server
 >$ redis-server
 
