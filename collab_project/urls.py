@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from users.views import HomePageView
-
+from django.conf import settings
 
 urlpatterns = [
     # Django admin
@@ -30,3 +30,13 @@ urlpatterns = [
     path("formset/", include("formset_app.urls"),),
     path("snippets/", include("snippets.urls")),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+
+        # For django versions before 2.0:
+        # url(r'^__debug__/', include(debug_toolbar.urls)),
+
+    ] + urlpatterns
