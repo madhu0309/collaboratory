@@ -98,7 +98,7 @@ class Question(VoteModel, models.Model):
     #     return reverse("question-detail", args=[str(self.id)])
 
     def get_question_body(self):
-        return self.question_body[:50]
+        return self.question_body[:300]
 
     @property
     def comments(self):
@@ -111,6 +111,9 @@ class Question(VoteModel, models.Model):
         instance = self
         content_type = ContentType.objects.get_for_model(instance.__class__)
         return content_type
+
+    class Meta:
+        ordering = ["-id"]
 
 
 # for comment in Comment.objects.all():

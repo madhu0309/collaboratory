@@ -3,6 +3,7 @@
 {% load markdown_deux_tags %}
 {% load socialaccount %}
 {% load hitcount_tags %}
+{% load humanize %}
 {% block title %}Collab{% endblock title %}
 {% block content %}
 <a href="{% url 'collab_app:add-question' %}"><button type="button" class="btn btn-secondary" style="float: right;">Ask
@@ -10,58 +11,61 @@
 </a>
 <h1>Questions</h1>
 {% for question in question_lists %}
-<div class="list-group">
-    <div class="list-group-item">
-        <div class="float-right">
-            <a href="#" class="btn btn-info edit" title="View"><i class="fas fa-eye"></i></a>
-            <a href="{% url 'collab_app:question-update' question.slug %}" class="btn btn-success edit" title="Edit"><i
-                    class="fas fa-edit"></i></a>
-            <a href="{% url 'collab_app:question-delete' question.slug %}" class="btn btn-danger delete remove_account"
-                title="Delete"><i class="fas fa-trash"></i></a>
+<div class="row">
+    <div class="col-lg-1">
+    </div>
+    <div class="col-lg-11">
+        <div class="row">
+            <div class="col-lg-10">
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <div class="float-right">
+                            {% if question.created_by == request.user %}
+                            <a href="{% url 'collab_app:question-update' question.slug %}" class="btn btn-success edit"
+                                title="Edit"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'collab_app:question-delete' question.slug %}"
+                                class="btn btn-danger delete remove_account" title="Delete"><i
+                                    class="fas fa-trash"></i></a>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex">
+                            <div class="p-2">
+                                <p style="font-size: 24px; color:grey;">{{ question.votes.count }}</p>
+                                <p style="font-size: 12px; color:grey; margin-top:-15px; margin-left:-5px;">votes</p>
+                            </div>
+                            <div class=" p-2">
+                                <p style="font-size: 24px; color:grey;">{{question.question_answer.count}}</p>
+                                <p style="font-size: 12px; color:grey; margin-top:-15px; margin-left:-10px;">
+                                    answers</p>
+                            </div>
+                            <div class=" p-2">
+                                <p style="font-size: 24px; color:grey;">{% get_hit_count for question %}</p>
+                                <p style="font-size: 12px; color:grey; margin-top:-15px; margin-left:-6px;">views</p>
+                            </div>
+                            <div class="flex-grow-1">
+                                <a href=" {% url 'collab_app:question-detail' question.slug %}">
+                                    <p style="font-size: 18px; font-style: oblique;">{{ question.question_title }}</p>
+                                </a>
+                                <p style="font-size: 14px;">{{ question.get_question_body }}</p>
+                                <p style="font-size: 10px;
+                                /* position: absolute; */
+                                bottom: 8px;
+                                right: 16px;
+                                float: right;
+                              ">asked {{ question.pub_date|naturaltime }}
+                                    {{ question.created_by }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="d-flex">
-            <div class="p-2">
-                <p style="font-size: 24px; color:grey;">{% get_hit_count for question %}</p>
-                <p style="font-size: 12px; color:grey; margin-top:-15px; margin-left:-5px;">votes</p>
-            </div>
-            <div class=" p-2">
-                <p style="font-size: 24px; color:grey;">{{question.question_answer.count}}</p>
-                <p style="font-size: 12px; color:grey; margin-top:-15px; margin-left:-10px;">
-                    answers</p>
-            </div>
-            <div class=" p-2">
-                <p style="font-size: 24px; color:grey;">{% get_hit_count for question %}</p>
-                <p style="font-size: 12px; color:grey; margin-top:-15px; margin-left:-6px;">views</p>
-            </div>
-            <a href=" {% url 'collab_app:question-detail' question.slug %}">{{ question.question_title }}</a>
-            <p style="font-size: 12px;">{{ question.created_by }}</p>
-        </div>
+        <br />
     </div>
 </div>
-
 {% endfor %}
-<p></p>
-{% comment %} <div class="page">
-    {% if is_paginated %}
-    <ul class="pagination">
-        {% if page_obj.has_previous %}
-        <li>
-            <span><a href="?page={{ page_obj.previous_page_number }}&q={{search}}">Previous</a></span>
-        </li>
-        {% endif %}
-        <li class="">
-            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</span>
-        </li>
-        {% if page_obj.has_next %}
-        <li>
-            <span><a href="?page={{ page_obj.next_page_number }}&q={{search}}">Next</a></span>
-        </li>
-        {% endif %}
-    </ul>
-    {% else %}
-    <p style="color:green" ;>No more questions</p>
-    {% endif %}
-</div> {% endcomment %}
+
 <div class="d-flex flex-column m-auto pagination mt-5">
     <nav aria-label="Page navigation">
         <ul class="pagination pg-grey justify-content-center">

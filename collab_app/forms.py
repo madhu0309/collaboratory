@@ -36,6 +36,15 @@ class QuestionForm(forms.ModelForm):
 
         model = models.Question
         fields = ("question_title", "question_body")
+
+    def __init__(self, *args, **kwargs):
+        super(QuestionForm, self).__init__(
+            *args, **kwargs
+        )  # Call to ModelForm constructor
+        self.fields["question_body"].widget.attrs["cols"] = 120
+        self.fields["question_body"].widget.attrs["rows"] = 10
+        # self.fields["question_body"].widget.attrs["row"] = 5
+        # self.fields['long_desc'].widget.attrs['rows'] = 20
         # widgets = {
         #     "question_title": forms.TextInput(
         #         attrs={

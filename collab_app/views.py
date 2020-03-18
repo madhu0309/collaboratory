@@ -20,6 +20,7 @@ from collab_app.serializers import UserSerializer
 from hitcount.views import HitCountDetailView
 from django.http import JsonResponse
 from braces.views import JSONResponseMixin, AjaxResponseMixin
+from collab_app.tasks import send_email_user_answer
 
 # CLASS BASED VIEWS
 
@@ -171,19 +172,56 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
 class AnswerCreateView(LoginRequiredMixin, CreateView):
     form_class = AnswerForm
     template_name = "collab_app/question_detail.html"
+    # model = Answer
     # slug_url_kwarg = 'slug'
     # query_pk_and_slug = True
 
-    def form_valid(self, form):
-        instance = form.save(commit=False)
-        # instance.created_by = self.request.user
-        question = Question.objects.get(pk=self.kwargs["pk"])
-        instance.question = question
-        instance.save()
-        # args = [question.slug]
-        # print(args)
-        url = reverse("collab_app:question-detail", kwargs={"slug": question.slug})
-        return HttpResponseRedirect(url)
+    def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests: instantiate a form instance with the passed
+        POST variables and then check if it's valid.
+        """
+        form = self.get_form()
+        current_site = request.get_host()
+        added_by = self.request.user.email
+        if form.is_valid():
+            instance = form.save(commit=False)
+            # instance.created_by = self.request.user
+            question = Question.objects.get(pk=self.kwargs["pk"])
+            instance.question = question
+            send_email_user_answer.delay(
+                question.created_by.email,
+                # self.object.question.email,
+                added_by=added_by,
+                domain=current_site,
+                protocol=self.request.scheme,
+            )
+            instance.save()
+            # args = [question.slug]
+            # print(args)
+            url = reverse("collab_app:question-detail", kwargs={"slug": question.slug})
+            return HttpResponseRedirect(url)
+        else:
+            return self.form_invalid(form)
+
+    # def form_valid(self, form):
+    #     instance = form.save(commit=False)
+    #     # instance.created_by = self.request.user
+    #     question = Question.objects.get(pk=self.kwargs["pk"])
+    #     instance.question = question
+    #     current_site = self.request.get_host()
+    #     added_by = self.request.user.email
+    #     send_email_user_answer.delay(
+    #         self.object.email,
+    #         added_by=added_by,
+    #         domain=current_site,
+    #         protocol=self.request.scheme,
+    #     )
+    #     instance.save()
+    #     # args = [question.slug]
+    #     # print(args)
+    #     url = reverse("collab_app:question-detail", kwargs={"slug": question.slug})
+    #     return HttpResponseRedirect(url)
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
@@ -237,9 +275,9 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
                 c_type = str(content_type)
                 print(c_type)
                 # import pbd;pdb.set_trace()
-                content_type = ContentType.objects.get(
-                    app_label=c_type.split()[0], model=c_type.split()[2]
-                )
+                # content_type = ContentType.objects.get(
+                #     app_label=c_type.split()[0], model=c_type.split()[2]
+                # )
                 # obj_id = comment_form_var.cleaned_data.get("object_id")
                 object_id = question.id
                 obj_id = object_id

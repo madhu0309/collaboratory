@@ -1,24 +1,73 @@
-{% extends "_base.html" %} 
+{% extends "_base.html" %}
 {% load static %}
 {% load socialaccount %}
-{% block title %}Home{% endblock title %} 
+{% block title %}Home{% endblock title %}
 {% block content %}
-<h1>Homepage</h1>
-<a href="{% url 'collab_app:question-list' %}">Ask Question Here</a><br>
-<a href="{% url 'formset_app:inline' 1 %}">Inline Formset Factory</a><br>
-<a href="{% url 'formset_app:model' %}">Model Formset Factory</a><br>
-<a href="{% url 'formset_app:normal' %}">Formset Factory</a><br>
-<a href="{% url 'formset_app:model_with_authors' %}">ModelFormsetFactoryWithAuthor</a><br>
+<style>
+  body,
+  html {
+    height: 100%;
+    margin: 0;
+  }
 
-<img class="collabimage" src="{% static 'images/collab.jpg' %}" ><br>
-{% if user.is_authenticated %}
-  Hi {{ user.email }}
+  .collabimage {
+    /* The image used */
+
+    /* Full height */
+    height: 100%;
+    width: 100%;
+
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+  }
+
+  a {
+    color: gray;
+  }
+
+  p.name {
+    position: absolute;
+    color: rgb(179, 255, 0);
+    top: 100px;
+    left: 20px;
+    font-size: 30px;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  .text-block {
+    position: absolute;
+    top: 160px;
+    left: 20px;
+    /* background-color: white; */
+    color: white;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+</style>
+<div class="contain">
+  <img class="collabimage" src="{% static 'images/collab.jpg' %}">
+  <div class="text-block">
+    <a href="{% url 'collab_app:question-list' %}">Ask Question Here</a><br>
+    <a href="snippets/">REST API</a><br>
+    <a href="{% url 'formset_app:inline' 1 %}">Inline Formset Factory</a><br>
+    <a href="{% url 'formset_app:model' %}">Model Formset Factory</a><br>
+    <a href="{% url 'formset_app:normal' %}">Formset Factory</a><br>
+    <a href="{% url 'formset_app:model_with_authors' %}">ModelFormsetFactoryWithAuthor</a><br>
+  </div>
+  {% if user.is_authenticated %}
+  <p class="name">Hi {{ user.username }}</p>
   <p><a href="{% url 'account_logout' %}">Log Out</a></p>
-{% else %}
+  {% else %}
   <p>You are not logged in</p>
   <!--Github-->
-  <a href="{% provider_login_url 'github' %}" ><p class="git">Github</p></a>
+  <a href="{% provider_login_url 'github' %}">
+    <p class="git">Github</p>
+  </a>
   <a href="{% url 'account_login' %}">Login</a>
   <a href="{% url 'account_signup' %}">Sign Up</a>
-{% endif %}
+  {% endif %}
+</div>
 {% endblock content %}

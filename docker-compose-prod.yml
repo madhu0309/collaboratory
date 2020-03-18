@@ -6,9 +6,9 @@ services:
     #command: python /task/manage.py runserver 0.0.0.0:8000
     command: gunicorn collab_project.wsgi -b 0.0.0.0:8000
     environment: 
-      - ENVIRONMENT=development
+      - ENVIRONMENT=production
       - SECRET_KEY=wgd40#_k7dij%4yx=a8b-c!1e-w9sh2h&&%=w-z496sxap%c)j
-      - DEBUG=1
+      - DEBUG=0
     volumes:
       - .:/task
     ports: 
@@ -24,20 +24,20 @@ services:
       - POSTGRES_DB=collaboratory
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-  redis:
-    image: redis:latest
-    container_name: rz01
-    ports:
-      - "6379:6379" 
-  celery:
-    build: .
-    command: celery -A collab_project worker -l info
-    volumes:
-      - .:/task
-    depends_on:
-      - db
-      - redis
+#   redis:
+#     image: redis:latest
+#     container_name: rz01
+#     ports:
+#       - "6379:6379" 
+#   celery:
+#     build: .
+#     command: celery -A collab_project worker -l info
+#     volumes:
+#       - .:/task
+#     depends_on:
+#       - db
+#       - redis
   
 
-volumes:
+volumes: 
   postgres_data:

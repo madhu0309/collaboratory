@@ -7,7 +7,7 @@
         output = window.Markdown;
         Converter = output.Converter;
     }
-
+        
     output.getSanitizingConverter = function () {
         var converter = new Converter();
         converter.hooks.chain("postConversion", sanitizeHtml);
@@ -41,7 +41,7 @@
                         return "%27";
                     else
                         return encodeURIComponent(c);
-
+                    
                 });
             });
             if (anyChange && (encoded.match(a_white) || encoded.match(img_white)))

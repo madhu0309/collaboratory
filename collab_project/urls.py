@@ -20,7 +20,7 @@ from django.conf import settings
 
 urlpatterns = [
     # Django admin
-    path("admin/", admin.site.urls),
+    path("mydatebase/", admin.site.urls),
     # User management
     # path("accounts/", include("django.contrib.auth.urls")),
     # Local apps
@@ -33,10 +33,9 @@ urlpatterns = [
 
 if settings.DEBUG:
     import debug_toolbar
-    urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
 
+    urlpatterns = [
+        path("__debug__/", include(debug_toolbar.urls)),
         # For django versions before 2.0:
         # url(r'^__debug__/', include(debug_toolbar.urls)),
-
     ] + urlpatterns

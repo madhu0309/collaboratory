@@ -3,7 +3,7 @@ jQuery(function () {
         var value = $(this).val();
         console.log(value)
         $.ajax({
-            url: "/collab/",
+            url: "",
             data: {
                 'search': value
             },

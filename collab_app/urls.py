@@ -16,9 +16,9 @@ router.register(r"users", views.UserViewSet)
 urlpatterns = [
     path("", views.QuestionListView.as_view(), name="question-list"),
     # path("search/", views.question_list_view, name="question-search"),
-    path(
-        "detail/<int:question_id>/", views.question_detail_view, name="question-detail"
-    ),
+    # path(
+    #     "detail/<int:question_id>/", views.question_detail_view, name="question-detail"
+    # ),
     path(
         "detail/<slug:slug>/",
         views.QuestionDetailView.as_view(),
@@ -39,7 +39,7 @@ urlpatterns = [
     path("ques-downvote/<int:question_id>/", views.ques_downvote, name="ques-downvote"),
     path("upvote/<int:answer_id>/", views.upvote, name="upvotes"),
     path("downvote/<int:answer_id>/", views.downvote, name="downvotes"),
-    path("comment/", views.add_comment_view, name="add-comment"),
+    # path("comment/", views.add_comment_view, name="add-comment"),
     path("hitcount/", include(("hitcount.urls", "hitcount"), namespace="hitcount")),
     path("", include(router.urls)),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),

@@ -9,8 +9,9 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /task
 
 #Install dependencies 
-COPY Pipfile Pipfile.lock /task/
+COPY Pipfile Pipfile.lock requirements.txt /task/
 RUN pip install pipenv && pipenv install --system
+# RUN pipenv install -r requirements.txt
 
 #Copy project
 COPY . /task/
