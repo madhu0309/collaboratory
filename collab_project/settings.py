@@ -112,9 +112,9 @@ WSGI_APPLICATION = "collab_project.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "collaboratory",
+        "NAME": "postgres",
         "USER": "postgres",
-        "PASSWORD": "root",
+        "PASSWORD": "postgres",
         "HOST": "db",
         "PORT": 5432,
     }
