@@ -28,7 +28,7 @@
      mb-3 bg-white border-bottom shadow-sm">
       <a href="{% url 'users:home' %}" class="navbar-brand my-0 mr-md-auto font-weight-normal">Collaboratory</a>
 
-      <form class="form-inline mt-2 mt-md-0" action=" {% url 'collab_app:question-list' %}" method="get">
+      <form class="form-inline mt-2 mt-md-0" action=" {% url 'collab_app:question-list' %}" method="POST">
         <input name="q" class="form-control js-question-list mr-sm-2" id="id_input" value="{{ query }}" type="text"
           placeholder="Search" aria-label="ollab\\/detail\\/(?P<pk>[Search">
         <div id='match-list'></div>

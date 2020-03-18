@@ -80,7 +80,7 @@ class QuestionListView(JSONResponseMixin, AjaxResponseMixin, ListView):
         # search_key =
         context = super(QuestionListView, self).get_context_data(**kwargs)
         if self.request.GET.get("q") != None:
-            query = self.request.GET.get("q")
+            query = self.request.POST.get("q")
             question_list = Question.objects.filter(
                 # | Q(author__icontains=query)
                 Q(question_title__icontains=query)
